@@ -14,6 +14,13 @@ const crypto = require('crypto');
 const SUPABASE_URL = process.env.SUPABASE_URL || '';
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
+// Daftar tetap Departemen (harus sinkron dengan DEPARTEMEN_LIST di public/index.html)
+const DEPARTEMEN_LIST = [
+  'Cannery', 'Maintenance CN', 'Can Making', 'Concentrate', 'Label',
+  'Drum Plant', 'Power Plant', 'Biogas', 'Quality Control', 'QA',
+  'Lab Sentral', 'Factory Keeping',
+];
+
 function sbHeaders() {
   return {
     apikey: SERVICE_KEY,
@@ -189,6 +196,10 @@ function validateKasus(body) {
   if (body.hko === undefined || body.hko === null || isNaN(parseFloat(body.hko))) {
     return { error: 'HKO wajib diisi dengan angka (boleh 0)' };
   }
+  // Departemen boleh kosong (data lama belum diisi), tapi kalau diisi harus dari daftar tetap
+  if (body.departemen && !DEPARTEMEN_LIST.includes(body.departemen)) {
+    return { error: 'Departemen tidak valid. Pilih dari daftar yang tersedia.' };
+  }
   return {};
 }
 
@@ -196,6 +207,7 @@ function pickKasusFields(body) {
   return {
     tgl: body.tgl,
     nama: (body.nama || '').trim(),
+    departemen: body.departemen || '',
     subdep: body.subdep || '',
     jenis: body.jenis || 'Lain-lain',
     kronologi: body.kronologi || '',
