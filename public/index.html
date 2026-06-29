@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Dashboard Performance Kecelakaan Kerja — Factory 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<style>
+:root{
+  --bg:#f5f4f1;--surface:#fff;--sf2:#f1efe8;--sf3:#e8e6df;
+  --bdr:rgba(0,0,0,0.10);--text:#18180f;--t2:#5a5956;--t3:#888680;
+  --blue:#2870c2;--blue-bg:#deeaf8;--blue-t:#0b3d7a;
+  --green:#4e8c12;--green-bg:#dff0cc;--green-t:#2d5a05;
+  --red:#d93535;--red-bg:#fce8e8;--red-t:#8c1a1a;
+  --amber:#b06d10;--amber-bg:#fdf0d8;--amber-t:#7a4300;
+  --r:10px;--rs:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);font-size:13px}
+.page{max-width:1200px;margin:0 auto;padding:20px 20px 60px}
+
+/* ── HEADER ── */
+.top-label{font-size:11px;font-weight:700;color:var(--t2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+.main-title{font-size:22px;font-weight:800;letter-spacing:-.01em;margin-bottom:2px}
+.sub-period{font-size:12px;color:var(--t2);margin-bottom:10px}
+.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;flex-wrap:wrap;gap:10px}
+.badges{display:flex;gap:6px;flex-wrap:wrap}
+.badge{font-size:11px;font-weight:600;padding:4px 11px;border-radius:20px}
+.bg{background:var(--green-bg);color:var(--green-t)}
+.ba{background:var(--amber-bg);color:var(--amber-t)}
+.br{background:var(--red-bg);color:var(--red-t)}
+.bb{background:var(--blue-bg);color:var(--blue-t)}
+.hdr-btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font-size:12px;padding:7px 14px;border-radius:var(--rs);cursor:pointer;border:.5px solid var(--bdr);background:var(--surface);color:var(--t2);font-weight:500}
+.btn:hover{background:var(--sf2)}
+.btn-p{background:var(--blue-bg);color:var(--blue-t);border-color:transparent}
+.btn-p:hover{opacity:.85}
+
+/* ── GLOSSARY STRIP ── */
+.glossary{background:var(--blue-bg);border-radius:var(--rs);padding:9px 16px;margin-bottom:18px;font-size:11.5px;color:var(--blue-t);display:flex;flex-wrap:wrap;gap:6px 20px;line-height:1.6}
+.glossary strong{font-weight:700}
+
+/* ── KPI GRID ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-bottom:18px}
+@media(max-width:960px){.kpi-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:520px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--sf2);border-radius:var(--r);padding:14px 14px 12px;position:relative}
+.kpi-lbl{font-size:10.5px;color:var(--t2);margin-bottom:5px;line-height:1.35}
+.kpi-main{display:flex;align-items:baseline;gap:6px}
+.kpi-val{font-size:26px;font-weight:800;line-height:1}
+.kpi-val2{font-size:14px;font-weight:600;color:var(--t2)}
+.kpi-sub{font-size:10px;color:var(--t3);margin-top:4px;line-height:1.4}
+.kpi.green .kpi-val{color:var(--green)}
+.kpi.blue .kpi-val{color:var(--blue)}
+.kpi.red .kpi-val{color:var(--red)}
+.kpi.amber .kpi-val{color:var(--amber)}
+.kpi-divider{width:1px;background:var(--bdr);margin:4px 0}
+
+/* ── CARDS ── */
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:720px){.r2,.r3{grid-template-columns:1fr}}
+.card{background:var(--surface);border:.5px solid var(--bdr);border-radius:var(--r);padding:18px}
+.card-full{margin-bottom:14px}
+.ct{font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:14px}
+.ct-desc{font-size:10.5px;color:var(--t3);font-weight:400;text-transform:none;letter-spacing:0;margin-left:6px}
+
+/* ── PROGRESS ── */
+.prog{margin:10px 0}
+.prog-lbl{display:flex;justify-content:space-between;font-size:11.5px;color:var(--t2);margin-bottom:5px}
+.prog-track{height:7px;background:var(--sf2);border-radius:4px;overflow:hidden}
+.prog-fill{height:100%;border-radius:4px}
+.bnum{font-size:32px;font-weight:800;line-height:1}
+.bsub{font-size:11.5px;color:var(--t2);margin-top:3px}
+.info-row{display:flex;justify-content:space-between;font-size:11px;color:var(--t2);margin-top:8px}
+.info-note{font-size:10.5px;color:var(--t3);margin-top:5px}
+
+/* ── CHART & TABS ── */
+.tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.tab{font-size:11px;padding:4px 12px;border:.5px solid var(--bdr);border-radius:20px;cursor:pointer;background:transparent;color:var(--t2)}
+.tab.active{background:var(--blue-bg);color:var(--blue-t);border-color:transparent;font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;font-size:11px;color:var(--t2)}
+.ld{display:flex;align-items:center;gap:5px}
+.lsq{width:10px;height:10px;border-radius:2px}
+.lln{width:18px;height:0;border-top:2.5px dashed var(--red)}
+
+/* ── MONTHLY TABLE ── */
+.mtbl{width:100%;border-collapse:collapse;font-size:11.5px}
+.mtbl th{text-align:center;padding:7px 6px;font-weight:600;font-size:10.5px;color:var(--t2);background:var(--sf2);border-bottom:.5px solid var(--bdr)}
+.mtbl th:first-child{text-align:left;padding-left:10px}
+.mtbl td{text-align:center;padding:6px 6px;border-bottom:.5px solid var(--bdr);font-size:11.5px}
+.mtbl td:first-child{text-align:left;color:var(--t2);padding-left:10px}
+.ok{color:var(--green);font-weight:700}
+.warn{color:var(--amber);font-weight:700}
+.danger{color:var(--red);font-weight:700}
+
+/* ── SEP ── */
+.sep{display:flex;align-items:center;gap:12px;margin:26px 0 16px}
+.sep span{font-size:13px;font-weight:700;white-space:nowrap}
+.sep::before,.sep::after{content:'';flex:1;height:.5px;background:var(--bdr)}
+
+/* ── FILTER BAR ── */
+.fbar{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.fbar label{font-size:11px;color:var(--t2);font-weight:600}
+.ftab{font-size:11px;padding:5px 14px;border:.5px solid var(--bdr);border-radius:20px;cursor:pointer;background:transparent;color:var(--t2)}
+.ftab.active{background:var(--blue-bg);color:var(--blue-t);border-color:transparent;font-weight:700}
+.finfo{font-size:11px;color:var(--t3);margin-left:4px}
+
+/* ── ANA KPI ── */
+.ana-kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+@media(max-width:720px){.ana-kpi{grid-template-columns:repeat(2,1fr)}}
+.akpi{background:var(--sf2);border-radius:var(--rs);padding:14px 16px}
+.akpi-lbl{font-size:11px;color:var(--t2);margin-bottom:4px;line-height:1.4;font-weight:600}
+.akpi-lbl2{font-size:10px;color:var(--t3);font-weight:400}
+.akpi-val{font-size:26px;font-weight:800;line-height:1;margin:4px 0}
+.akpi-sub{font-size:10.5px;color:var(--t3)}
+
+/* ── HIGHLIGHT BOX ── */
+.week-highlight{background:linear-gradient(135deg,#fff8ed 0%,#fff3e0 100%);border:1.5px solid var(--amber);border-radius:var(--r);padding:18px 20px;margin-bottom:14px}
+.wh-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.wh-title{font-size:14px;font-weight:800;color:var(--amber-t)}
+.wh-sub{font-size:11.5px;color:var(--amber-t);margin-top:2px;opacity:.8}
+.wh-badge{font-size:12px;font-weight:700;padding:5px 14px;border-radius:20px;background:var(--amber-bg);color:var(--amber-t);border:1px solid var(--amber)}
+.wh-empty{text-align:center;padding:20px;color:var(--t3);font-size:12.5px}
+
+/* ── CASE TABLE ── */
+.ctbl-wrap{overflow-x:auto;border-radius:var(--rs);border:.5px solid var(--bdr)}
+.ctbl{width:100%;border-collapse:collapse;font-size:12px;min-width:960px}
+.ctbl thead tr{background:var(--sf2)}
+.ctbl th{text-align:left;padding:9px 10px;font-size:10.5px;font-weight:700;color:var(--t2);border-bottom:.5px solid var(--bdr);white-space:nowrap}
+.ctbl td{padding:8px 10px;border-bottom:.5px solid var(--bdr);color:var(--text);vertical-align:top;font-size:11.5px;line-height:1.45}
+.ctbl tbody tr:last-child td{border-bottom:none}
+.ctbl tbody tr:hover td{background:var(--sf2)}
+.pill{font-size:10px;padding:2px 8px;border-radius:20px;display:inline-block;white-space:nowrap;font-weight:700}
+.p-lti{background:var(--red-bg);color:var(--red-t)}
+.p-nlti{background:var(--green-bg);color:var(--green-t)}
+.empty-st{text-align:center;padding:28px;color:var(--t3);font-size:12px}
+
+/* ── LEGEND GLOSSARY IN CHART ── */
+.chart-note{font-size:10px;color:var(--t3);margin-top:6px;font-style:italic}
+
+footer{text-align:center;font-size:11px;color:var(--t3);margin-top:36px;padding-top:14px;border-top:.5px solid var(--bdr)}
+@media print{.hdr-btns,.btn,.act-col,.fab-add{display:none}.page{padding:10px}}
+
+/* ── PIN GATE ── */
+#pin-gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px}
+.pin-box{background:var(--surface);border-radius:14px;padding:32px 30px;max-width:340px;width:100%;box-shadow:0 8px 30px rgba(0,0,0,.12);text-align:center}
+.pin-box .pin-icon{font-size:32px;margin-bottom:8px}
+.pin-box h2{font-size:16px;font-weight:800;margin-bottom:4px}
+.pin-box p{font-size:11.5px;color:var(--t2);margin-bottom:18px;line-height:1.5}
+.pin-input{width:100%;font-size:20px;letter-spacing:.3em;text-align:center;padding:12px;border-radius:var(--rs);border:1px solid var(--bdr);background:var(--sf2);color:var(--text);margin-bottom:12px}
+.pin-input:focus{outline:2px solid var(--blue);outline-offset:1px}
+.pin-submit{width:100%;padding:11px;border-radius:var(--rs);border:none;background:var(--blue);color:#fff;font-weight:700;font-size:13px;cursor:pointer}
+.pin-submit:hover{opacity:.9}
+.pin-submit:disabled{opacity:.5;cursor:not-allowed}
+.pin-err{color:var(--red-t);font-size:11.5px;margin-top:10px;min-height:14px}
+#app-root{display:none}
+
+/* ── ROLE BADGE & LOGOUT ── */
+.role-badge{font-size:10.5px;font-weight:700;padding:4px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:5px}
+.role-admin{background:var(--amber-bg);color:var(--amber-t)}
+.role-viewer{background:var(--blue-bg);color:var(--blue-t)}
+.btn-logout{font-size:11px;padding:5px 11px;border-radius:var(--rs);border:.5px solid var(--bdr);background:transparent;color:var(--t2);cursor:pointer}
+.btn-logout:hover{background:var(--sf2)}
+
+/* ── FLOATING ADD BUTTON (admin only) ── */
+.fab-add{position:fixed;bottom:26px;right:26px;background:var(--blue);color:#fff;border:none;border-radius:50px;padding:13px 20px;font-size:13px;font-weight:700;box-shadow:0 4px 16px rgba(0,0,0,.2);cursor:pointer;z-index:50;display:flex;align-items:center;gap:7px}
+.fab-add:hover{opacity:.92}
+
+/* ── ACTION COLUMN (Edit/Hapus) ── */
+.act-col{white-space:nowrap}
+.btn-mini{font-size:10.5px;padding:4px 9px;border-radius:5px;border:none;cursor:pointer;font-weight:600;margin-right:4px}
+.btn-mini-edit{background:var(--blue-bg);color:var(--blue-t)}
+.btn-mini-edit:hover{opacity:.8}
+.btn-mini-del{background:var(--red-bg);color:var(--red-t)}
+.btn-mini-del:hover{opacity:.8}
+
+/* ── MODAL FORM ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:900;padding:16px}
+.modal-overlay.show{display:flex}
+.modal-box{background:var(--surface);border-radius:14px;padding:24px 24px 20px;max-width:560px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 10px 40px rgba(0,0,0,.25)}
+.modal-box h3{font-size:16px;font-weight:800;margin-bottom:16px}
+.form-row{margin-bottom:13px}
+.form-row label{display:block;font-size:11.5px;font-weight:700;color:var(--t2);margin-bottom:5px}
+.form-row input,.form-row select,.form-row textarea{width:100%;padding:9px 11px;border-radius:var(--rs);border:1px solid var(--bdr);background:var(--sf2);color:var(--text);font-size:13px;font-family:inherit}
+.form-row textarea{min-height:80px;resize:vertical}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{outline:2px solid var(--blue);outline-offset:1px}
+.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+.form-err{color:var(--red-t);font-size:11.5px;margin-top:4px;min-height:14px}
+.hint{font-size:10.5px;color:var(--t3);margin-top:3px}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:#fff;padding:11px 20px;border-radius:8px;font-size:12.5px;font-weight:600;opacity:0;transition:.25s;z-index:1100;pointer-events:none;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.err{background:var(--red)}
+</style>
+</head>
+<body>
+
+<!-- ══ PIN GATE ══ -->
+<div id="pin-gate">
+  <div class="pin-box">
+    <div class="pin-icon">🔒</div>
+    <h2>Dashboard K3 Factory 2026</h2>
+    <p>Masukkan PIN untuk membuka dashboard. PIN Viewer hanya untuk melihat data, PIN Admin bisa mengubah data.</p>
+    <input type="password" id="pin-field" class="pin-input" inputmode="numeric" maxlength="12" placeholder="••••" autocomplete="off">
+    <button class="pin-submit" id="pin-submit-btn" onclick="submitPin()">Buka Dashboard</button>
+    <div class="pin-err" id="pin-err"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- ══ MODAL: TAMBAH/EDIT KASUS ══ -->
+<div class="modal-overlay" id="modal-kasus">
+  <div class="modal-box">
+    <h3 id="modal-kasus-title">Tambah Kasus Baru</h3>
+    <input type="hidden" id="kasus-id">
+    <div class="form-grid-2">
+      <div class="form-row">
+        <label>Tanggal *</label>
+        <input type="date" id="kasus-tgl">
+      </div>
+      <div class="form-row">
+        <label>HKO Hilang (hari) *</label>
+        <input type="number" id="kasus-hko" min="0" step="0.5" placeholder="0">
+        <div class="hint">≥ 0,5 hari otomatis dihitung sebagai LTI</div>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Nama Lengkap *</label>
+      <input type="text" id="kasus-nama" placeholder="Nama tenaga kerja">
+    </div>
+    <div class="form-grid-2">
+      <div class="form-row">
+        <label>Sub-Departemen</label>
+        <input type="text" id="kasus-subdep" placeholder="mis. Power Plant">
+      </div>
+      <div class="form-row">
+        <label>Jenis Kejadian</label>
+        <select id="kasus-jenis">
+          <option>Terpeleset/Terjatuh</option>
+          <option>Tertimpa Benda</option>
+          <option>Terjepit</option>
+          <option>Tersayat</option>
+          <option>Tergores</option>
+          <option>Tertusuk</option>
+          <option>Paparan Kimia/Soda</option>
+          <option>Lain-lain</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Lokasi Kejadian</label>
+      <input type="text" id="kasus-lokasi" placeholder="mis. ESP #03">
+    </div>
+    <div class="form-row">
+      <label>Kronologi</label>
+      <textarea id="kasus-kronologi" placeholder="Ceritakan kronologi kejadian secara lengkap"></textarea>
+    </div>
+    <div class="form-err" id="kasus-err"></div>
+    <div class="form-actions">
+      <button class="btn" onclick="closeModal('modal-kasus')">Batal</button>
+      <button class="btn btn-p" id="kasus-save-btn" onclick="submitKasus()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: JAM KERJA BULANAN ══ -->
+<div class="modal-overlay" id="modal-jam">
+  <div class="modal-box" style="max-width:420px">
+    <h3>Kelola Jam Kerja Bulanan</h3>
+    <p style="font-size:11.5px;color:var(--t2);margin-bottom:14px">Jam kerja ini dipakai untuk menghitung FR & SR setiap bulan. Tandai "estimasi sementara" kalau datanya belum final.</p>
+    <div id="jam-list"></div>
+    <div class="form-err" id="jam-err"></div>
+    <div class="form-actions">
+      <button class="btn" onclick="closeModal('modal-jam')">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: GANTI PIN VIEWER ══ -->
+<div class="modal-overlay" id="modal-rotate-pin">
+  <div class="modal-box" style="max-width:400px;text-align:center">
+    <h3 style="text-align:left">🔄 Ganti PIN Viewer</h3>
+    <div id="rotate-pin-confirm">
+      <p style="font-size:12px;color:var(--t2);text-align:left;line-height:1.6;margin-bottom:6px">
+        PIN Viewer lama akan <strong>langsung tidak berlaku</strong> begitu PIN baru dibuat.
+        Sistem akan men-generate PIN baru 6 digit secara acak.
+      </p>
+      <p style="font-size:11px;color:var(--t3);text-align:left;margin-bottom:16px" id="rotate-pin-lastinfo"></p>
+      <div class="form-err" id="rotate-pin-err"></div>
+      <div class="form-actions" style="justify-content:flex-start">
+        <button class="btn" onclick="closeModal('modal-rotate-pin')">Batal</button>
+        <button class="btn btn-p" id="rotate-pin-btn" onclick="doRotatePin()">Generate PIN Baru</button>
+      </div>
+    </div>
+    <div id="rotate-pin-result" style="display:none">
+      <p style="font-size:12px;color:var(--t2);margin-bottom:10px">PIN Viewer baru (catat/screenshot sekarang — PIN ini hanya ditampilkan sekali):</p>
+      <div style="font-size:32px;font-weight:800;letter-spacing:.15em;background:var(--sf2);border-radius:var(--rs);padding:16px;margin-bottom:14px;color:var(--blue-t)" id="rotate-pin-newvalue">------</div>
+      <div class="form-actions" style="justify-content:center">
+        <button class="btn btn-p" onclick="closeModal('modal-rotate-pin')">Selesai</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="app-root">
+<div class="page">
+
+<!-- ══ HEADER ══ -->
+<div class="hdr">
+  <div>
+    <div class="main-title">🛡️ Dashboard Performance Kecelakaan Kerja — Factory 2026</div>
+    <div class="sub-period" id="hdr-period">Periode: Januari – Juni 2026 · Data kumulatif s/d minggu terakhir</div>
+    <div class="badges">
+      <span class="badge bg" id="badge-fr">FR LTI 2.79 — Di bawah target ✓</span>
+      <span class="badge bg" id="badge-sr">SR 3.49 — Di bawah target ✓</span>
+      <span class="badge bb">Zero Fatality ✓</span>
+      <span class="badge ba" id="badge-week">📅 Update: Minggu ke-24-25 (13 Jun 26 – 19 Jun 26)</span>
+      <span class="role-badge" id="role-badge"></span>
+    </div>
+  </div>
+  <div class="hdr-btns">
+    <button class="btn" id="btn-jam-kerja" style="display:none" onclick="openJamModal()">⚙️ Jam Kerja</button>
+    <button class="btn" id="btn-rotate-pin" style="display:none" onclick="openRotatePinModal()">🔄 Ganti PIN Viewer</button>
+    <button class="btn btn-p" onclick="exportCSV()">⬇ Export CSV</button>
+    <button class="btn" onclick="window.print()">🖨 Cetak / PDF</button>
+    <button class="btn-logout" onclick="logout()">Keluar</button>
+  </div>
+</div>
+
+
+<!-- ══ GLOSSARY STRIP ══ -->
+<div class="glossary">
+  <span>📖 <strong>Panduan singkatan:</strong></span>
+  <span><strong>FR</strong> = Frequency Rate (Tingkat Kekerapan Kecelakaan) — jumlah kecelakaan per 1 juta jam kerja</span>
+  <span><strong>SR</strong> = Severity Rate (Tingkat Keparahan) — hari kerja hilang per 1 juta jam kerja</span>
+  <span><strong>LTI</strong> = Lost Time Injury — kecelakaan yang mengakibatkan <u>hari kerja hilang ≥ 0,5 hari</u></span>
+  <span><strong>Non-LTI</strong> = kecelakaan tanpa hari kerja hilang (First Aid / Medical Treatment)</span>
+  <span><strong>WR</strong> = Work Related — kecelakaan yang terjadi saat/karena aktivitas kerja</span>
+  <span><strong>HKO</strong> = Hari Kerja Operasi yang hilang akibat kecelakaan</span>
+</div>
+
+<!-- ══ KPI ══ -->
+<div class="kpi-grid">
+  <div class="kpi green">
+    <div class="kpi-lbl">📊 FR LTI — Frequency Rate<br><span style="font-size:10px;color:var(--t3)">(Tingkat Kekerapan LTI, Akumulatif)</span></div>
+    <div class="kpi-val" id="kpi-fr">2.79</div>
+    <div class="kpi-sub">Target: ≤ 6.20 &nbsp;✓ AMAN<br>per 1 juta jam kerja</div>
+  </div>
+  <div class="kpi green">
+    <div class="kpi-lbl">📉 SR — Severity Rate<br><span style="font-size:10px;color:var(--t3)">(Tingkat Keparahan, Akumulatif)</span></div>
+    <div class="kpi-val" id="kpi-sr">3.49</div>
+    <div class="kpi-sub">Target: ≤ 40.00 &nbsp;✓ AMAN<br>hari kerja hilang per 1 juta jam</div>
+  </div>
+  <div class="kpi amber">
+    <div class="kpi-lbl">⚠️ Kecelakaan LTI (Work Related)<br><span style="font-size:10px;color:var(--t3)">(yang menyebabkan hari kerja hilang)</span></div>
+    <div class="kpi-main">
+      <div class="kpi-val" id="kpi-lti">12</div>
+      <div style="font-size:11px;color:var(--t2);margin-left:8px;line-height:1.4">kasus LTI<br><span style="font-size:10px;color:var(--t3)" id="kpi-nolti-sub">+ 32 Non-LTI = 44 total WR</span></div>
+    </div>
+    <div class="kpi-sub">Basis perhitungan FR &amp; SR</div>
+  </div>
+  <div class="kpi red">
+    <div class="kpi-lbl">🕐 HKO Hilang — Hari Kerja Operasi<br><span style="font-size:10px;color:var(--t3)">(akibat kasus LTI)</span></div>
+    <div class="kpi-val" id="kpi-hko">15.0</div>
+    <div class="kpi-sub" id="kpi-hko-sub">hari kerja hilang akumulatif</div>
+  </div>
+  <div class="kpi blue">
+    <div class="kpi-lbl">👷 Jam Kerja Nyata<br><span style="font-size:10px;color:var(--t3)">(penyebut perhitungan FR & SR)</span></div>
+    <div class="kpi-val" id="kpi-jam">—</div>
+    <div class="kpi-sub" id="kpi-jam-sub">Akumulatif —</div>
+  </div>
+  <div class="kpi blue">
+    <div class="kpi-lbl">Σ Sigma Kakal<br><span style="font-size:10px;color:var(--t3)">(Process Sigma dari Jumlah LTI, basis 1 juta DPMO)</span></div>
+    <div class="kpi-val" id="kpi-sigma">—</div>
+    <div class="kpi-sub" id="kpi-sigma-sub">Akumulatif —</div>
+  </div>
+</div>
+
+<!-- ══ PROGRESS ══ -->
+<div class="r2">
+  <div class="card">
+    <div class="ct">Frequency Rate LTI vs Target<span class="ct-desc">— FR = (Jumlah LTI ÷ Jam Kerja) × 1.000.000</span></div>
+    <div class="bnum" style="color:var(--green)" id="prog-fr">—</div>
+    <div class="bsub">per 1 juta jam kerja orang</div>
+    <div class="prog" style="margin-top:14px">
+      <div class="prog-lbl"><span>Realisasi FR LTI</span><span id="prog-fr-lbl">— / 6.20 (—%)</span></div>
+      <div class="prog-track"><div class="prog-fill" id="prog-fr-fill" style="width:0%;background:var(--blue)"></div></div>
+    </div>
+    <div class="info-row"><span>Sisa ruang: <strong style="color:var(--green)" id="prog-fr-remain">—</strong> sebelum melebihi target</span></div>
+    <div class="info-note" id="prog-fr-note">Memuat data...</div>
+  </div>
+  <div class="card">
+    <div class="ct">Severity Rate vs Target<span class="ct-desc">— SR = (Total HKO ÷ Jam Kerja) × 1.000.000</span></div>
+    <div class="bnum" style="color:var(--green)" id="prog-sr">—</div>
+    <div class="bsub">hari kerja hilang per 1 juta jam kerja orang</div>
+    <div class="prog" style="margin-top:14px">
+      <div class="prog-lbl"><span>Realisasi SR</span><span id="prog-sr-lbl">— / 40.00 (—%)</span></div>
+      <div class="prog-track"><div class="prog-fill" id="prog-sr-fill" style="width:0%;background:var(--green)"></div></div>
+    </div>
+    <div class="info-row"><span>Sisa ruang: <strong style="color:var(--green)" id="prog-sr-remain">—</strong> sebelum melebihi target</span></div>
+    <div class="info-note" id="prog-sr-note">Memuat data...</div>
+  </div>
+</div>
+
+<!-- ══ TREND CHART ══ -->
+<div class="card card-full">
+  <div class="ct">Trend Bulanan FR (Frequency Rate) &amp; SR (Severity Rate) — Jan s/d Jun 2026</div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('fr_lti',this)">FR — LTI Saja<br><span style="font-size:9px;font-weight:400">Lost Time Injury (Hari Kerja Hilang ≥ 0,5)</span></button>
+    <button class="tab" onclick="switchTab('fr_total',this)">FR — Total (LTI + Non-LTI)<br><span style="font-size:9px;font-weight:400">Semua kecelakaan Work Related</span></button>
+    <button class="tab" onclick="switchTab('sr',this)">SR — Severity Rate<br><span style="font-size:9px;font-weight:400">Hari Kerja Hilang per 1 Juta Jam</span></button>
+  </div>
+  <div class="legend">
+    <div class="ld"><div class="lsq" style="background:var(--blue)"></div>Realisasi</div>
+    <div class="ld"><div class="lln"></div>Batas target</div>
+  </div>
+  <div style="position:relative;height:250px"><canvas id="trendChart"></canvas></div>
+  <div class="chart-note" id="trend-note">FR LTI = (Jumlah kasus LTI per bulan ÷ Jam Kerja Nyata bulan itu) × 1.000.000</div>
+</div>
+
+<!-- ══ ACC + HKO CHART ══ -->
+<div class="r2">
+  <div class="card">
+    <div class="ct">Distribusi kecelakaan per bulan<span class="ct-desc">— Work Related saja</span></div>
+    <div class="legend">
+      <div class="ld"><div class="lsq" style="background:var(--red)"></div>LTI (hari kerja hilang ≥ 0,5)</div>
+      <div class="ld"><div class="lsq" style="background:var(--green)"></div>Non-LTI (tanpa hari kerja hilang)</div>
+    </div>
+    <div style="position:relative;height:190px"><canvas id="accChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="ct">HKO hilang per bulan<span class="ct-desc">— dari kasus LTI</span></div>
+    <div class="legend"><div class="ld"><div class="lsq" style="background:var(--red)"></div>Hari Kerja Operasi (HKO) hilang</div></div>
+    <div style="position:relative;height:190px"><canvas id="hkoChart"></canvas></div>
+  </div>
+</div>
+
+<!-- ══ MONTHLY TABLE ══ -->
+<div class="card card-full">
+  <div class="ct">Rekap data bulanan — Work Related (basis LTI untuk FR &amp; SR)</div>
+  <div style="overflow-x:auto">
+    <table class="mtbl">
+      <thead>
+        <tr id="mtbl-head"><th>Metrik</th></tr>
+      </thead>
+      <tbody id="mtbl-body"></tbody>
+    </table>
+  </div>
+  <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;font-size:10.5px">
+    <span style="background:var(--green-bg);color:var(--green-t);padding:2px 8px;border-radius:4px;font-weight:600">OK — Di bawah target</span>
+    <span style="background:var(--amber-bg);color:var(--amber-t);padding:2px 8px;border-radius:4px;font-weight:600">PERHATIAN — Peningkatan signifikan</span>
+    <span style="background:var(--red-bg);color:var(--red-t);padding:2px 8px;border-radius:4px;font-weight:600">MELEBIHI TARGET</span>
+  </div>
+  <div style="margin-top:8px;font-size:10.5px;color:var(--t3);font-style:italic" id="mtbl-footnote"></div>
+</div>
+
+<!-- ══ ANALITIK ══ -->
+<div class="sep"><span>📊 Analitik Kecelakaan Kerja — Weekly / MTD / YTD</span></div>
+
+<div class="fbar">
+  <label>Periode:</label>
+  <button class="ftab active" onclick="setFilter('ytd',this)">YTD (Januari–sekarang)</button>
+  <button class="ftab" onclick="setFilter('mtd',this)">MTD (Bulan ini)</button>
+  <button class="ftab" onclick="setFilter('weekly',this)">Weekly (per minggu)</button>
+  <span class="finfo" id="f-info"></span>
+</div>
+
+<!-- ANA KPI -->
+<div class="ana-kpi">
+  <div class="akpi">
+    <div class="akpi-lbl">Total Kecelakaan Kerja (WR)<div class="akpi-lbl2">Work Related pada periode ini</div></div>
+    <div class="akpi-val" id="a-total" style="color:var(--amber)">—</div>
+    <div class="akpi-sub" id="a-lti-sub">LTI: — | Non-LTI: —</div>
+  </div>
+  <div class="akpi">
+    <div class="akpi-lbl">HKO Hilang — Hari Kerja Operasi<div class="akpi-lbl2">dari kasus LTI pada periode ini</div></div>
+    <div class="akpi-val" id="a-hko" style="color:var(--red)">—</div>
+    <div class="akpi-sub">hari kerja hilang</div>
+  </div>
+  <div class="akpi">
+    <div class="akpi-lbl">FR LTI — Frequency Rate<div class="akpi-lbl2">kasus LTI per 1 juta jam kerja</div></div>
+    <div class="akpi-val" id="a-fr" style="color:var(--blue)">—</div>
+    <div class="akpi-sub">per 1 juta jam kerja</div>
+  </div>
+  <div class="akpi">
+    <div class="akpi-lbl">SR — Severity Rate<div class="akpi-lbl2">hari kerja hilang per 1 juta jam</div></div>
+    <div class="akpi-val" id="a-sr" style="color:var(--blue)">—</div>
+    <div class="akpi-sub">hari hilang / juta jam</div>
+  </div>
+</div>
+
+<!-- ANA CHARTS: 3 kolom -->
+<div class="r3">
+  <div class="card">
+    <div class="ct">Per Sub-Departemen</div>
+    <div style="position:relative;height:210px"><canvas id="deptChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="ct">LTI vs Non-LTI<div class="ct-desc" style="display:block;margin-top:2px">LTI = Hari Kerja Hilang ≥ 0,5 · Non-LTI = Tanpa Hari Kerja Hilang</div></div>
+    <div style="position:relative;height:150px"><canvas id="ltiChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="ct">Jenis Kejadian Kecelakaan<div class="ct-desc" style="display:block;margin-top:2px">Terpeleset, Terjatuh, Tersayat, dll.</div></div>
+    <div style="position:relative;height:210px"><canvas id="jenisChart"></canvas></div>
+  </div>
+</div>
+
+<div class="card card-full" style="margin-bottom:14px">
+  <div class="ct">Per Lokasi Kejadian</div>
+  <div style="position:relative;height:160px"><canvas id="lokasiChart"></canvas></div>
+</div>
+
+<!-- ══ HIGHLIGHT MINGGU INI ══ -->
+<div class="sep"><span>🔔 Log Kasus Minggu Terkini</span></div>
+<div class="week-highlight" id="week-highlight-box">
+  <div class="wh-header">
+    <div>
+      <div class="wh-title" id="wh-title">🚨 Log Kasus — Minggu Terkini</div>
+      <div class="wh-sub" id="wh-sub">Menampilkan kasus pada minggu terakhir yang ada datanya</div>
+    </div>
+    <span class="wh-badge" id="wh-badge">— kasus</span>
+  </div>
+  <div class="ctbl-wrap">
+    <table class="ctbl">
+      <thead>
+        <tr>
+          <th>No</th><th>Tanggal</th><th>Nama</th><th>Sub-Departemen</th>
+          <th>Jenis Kejadian</th><th>Kronologi</th><th>Lokasi</th>
+          <th>Klasifikasi</th><th style="text-align:center">HKO</th>
+          <th class="act-col" id="wh-act-th" style="display:none">Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="wh-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ LOG LENGKAP ══ -->
+<div class="sep"><span>📋 Log Lengkap Kecelakaan Kerja (Work Related) — <span id="log-period-lbl">YTD 2026</span></span></div>
+<div class="card card-full">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+    <div class="ct" style="margin:0">Log Kasus — <span id="log-lbl2">YTD 2026</span></div>
+    <span style="font-size:11px;color:var(--t2)" id="log-count">Menampilkan — kasus</span>
+  </div>
+  <div class="ctbl-wrap">
+    <table class="ctbl">
+      <thead>
+        <tr>
+          <th style="width:34px">No</th>
+          <th style="width:90px">Tanggal</th>
+          <th style="width:56px">Minggu</th>
+          <th style="min-width:120px">Nama</th>
+          <th style="min-width:130px">Sub-Departemen</th>
+          <th style="min-width:100px">Jenis Kejadian</th>
+          <th style="min-width:220px">Kronologi</th>
+          <th style="min-width:120px">Lokasi</th>
+          <th style="width:90px;text-align:center">Klasifikasi</th>
+          <th style="width:60px;text-align:center">HKO</th>
+          <th class="act-col" id="log-act-th" style="display:none;width:100px;text-align:center">Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="case-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<footer>Dashboard Performance Kecelakaan Kerja · Factory 2026 · Data Work Related Jan–Juni 2026 · Logika: HKO ≥ 0,5 = LTI · FR & SR dihitung otomatis</footer>
+</div>
+</div><!-- /app-root -->
+
+<button class="fab-add" id="btn-add-kasus" style="display:none" onclick="openKasusModal()">+ Tambah Kasus</button>
+
+<script>
+// ══ PLUGIN REGISTER — harus paling atas sebelum Chart apapun dibuat ══
+Chart.register(ChartDataLabels);
+
+
+// ══ AUTH STATE ══
+let AUTH_TOKEN = sessionStorage.getItem('k3_token') || '';
+let AUTH_ROLE  = sessionStorage.getItem('k3_role')  || '';
+const API_BASE = '/api/data';
+
+function authHeaders(){
+  return { 'Content-Type':'application/json', 'Authorization':'Bearer '+AUTH_TOKEN };
+}
+
+async function submitPin(){
+  const pin = document.getElementById('pin-field').value.trim();
+  const errEl = document.getElementById('pin-err');
+  const btn = document.getElementById('pin-submit-btn');
+  errEl.textContent = '';
+  if(!pin){ errEl.textContent = 'Masukkan PIN terlebih dahulu.'; return; }
+  btn.disabled = true; btn.textContent = 'Memeriksa...';
+  try{
+    const r = await fetch('/api/verify-pin', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({pin}) });
+    const j = await r.json();
+    if(!r.ok){ errEl.textContent = j.error || 'PIN salah.'; btn.disabled=false; btn.textContent='Buka Dashboard'; return; }
+    AUTH_TOKEN = j.token; AUTH_ROLE = j.role;
+    sessionStorage.setItem('k3_token', AUTH_TOKEN);
+    sessionStorage.setItem('k3_role', AUTH_ROLE);
+    await bootApp();
+  }catch(e){
+    errEl.textContent = 'Gagal menghubungi server. Coba lagi.';
+    btn.disabled=false; btn.textContent='Buka Dashboard';
+  }
+}
+
+function logout(){
+  sessionStorage.removeItem('k3_token');
+  sessionStorage.removeItem('k3_role');
+  location.reload();
+}
+
+// ══ DATA STATE (diisi dari Supabase via /api/data) ══
+let allData = [];
+let JAM_BULAN = {};
+let JAM_YTD = 0;
+let JAM_ROWS = [];
+let PIN_VIEWER_SET_AT = null;
+
+async function fetchAllData(){
+  const r = await fetch(API_BASE, { headers: authHeaders() });
+  if(r.status===401){ logout(); return; }
+  const j = await r.json();
+  if(!r.ok) throw new Error(j.error||'Gagal memuat data');
+
+  allData = (j.kecelakaan||[]).map(d=>({
+    id: d.id, tgl: d.tgl, nama: d.nama, subdep: d.subdep,
+    jenis: d.jenis, kronologi: d.kronologi, lokasi: d.lokasi, hko: parseFloat(d.hko)||0
+  }));
+
+  JAM_ROWS = j.jamKerja||[];
+  JAM_BULAN = {};
+  JAM_ROWS.forEach(row=>{ JAM_BULAN[row.bulan] = parseFloat(row.jam_kerja)||0; });
+  JAM_YTD = JAM_ROWS.reduce((s,row)=>s+(parseFloat(row.jam_kerja)||0), 0);
+  PIN_VIEWER_SET_AT = j.pinViewerSetAt || null;
+}
+
+async function bootApp(){
+  document.getElementById('pin-gate').style.display = 'none';
+  document.getElementById('app-root').style.display = 'block';
+
+  const roleBadge = document.getElementById('role-badge');
+  if(AUTH_ROLE==='admin'){
+    roleBadge.textContent = '🛠️ Mode Admin';
+    roleBadge.className = 'role-badge role-admin';
+    document.getElementById('btn-add-kasus').style.display = 'flex';
+    document.getElementById('btn-jam-kerja').style.display = 'inline-block';
+    document.getElementById('btn-rotate-pin').style.display = 'inline-block';
+  }else{
+    roleBadge.textContent = '👁️ Mode Viewer';
+    roleBadge.className = 'role-badge role-viewer';
+  }
+
+  try{
+    await fetchAllData();
+    renderAll();
+    switchTab('fr_lti', document.querySelector('.tab.active'));
+  }catch(e){
+    showToast(e.message||'Gagal memuat data dari server', true);
+  }
+}
+
+(function tryAutoLogin(){
+  if(AUTH_TOKEN && AUTH_ROLE){
+    document.addEventListener('DOMContentLoaded', ()=>{ bootApp().catch(()=>logout()); });
+  }
+})();
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  const pf = document.getElementById('pin-field');
+  if(pf) pf.addEventListener('keydown', e=>{ if(e.key==='Enter') submitPin(); });
+});
+
+// ══ UTILS ══
+function weekNum(tgl){
+  const d=new Date(tgl),jan1=new Date(d.getFullYear(),0,1);
+  return Math.ceil(((d-jan1)/86400000+jan1.getDay()+1)/7);
+}
+function weekLabel(tgl){return 'W'+String(weekNum(tgl)).padStart(2,'0');}
+function getMonth(tgl){return new Date(tgl).getMonth()+1;}
+function isLTI(d){return (parseFloat(d.hko)||0)>=0.5;}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ══ SIGMA KAKAL ══
+// Rumus: =NORMSINV((1.000.000 - Jumlah LTI) / 1.000.000) + 1,5
+// NORMSINV (invers CDF normal standar) tidak ada built-in di JS,
+// jadi dipakai algoritma approksimasi Peter Acklam (akurasi tinggi, ~1e-9).
+function normsinv(p){
+  if(p<=0) return -Infinity;
+  if(p>=1) return Infinity;
+  const a1=-3.969683028665376e+01,a2=2.209460984245205e+02,a3=-2.759285104469687e+02,
+        a4=1.383577518672690e+02,a5=-3.066479806614716e+01,a6=2.506628277459239e+00;
+  const b1=-5.447609879822406e+01,b2=1.615858368580409e+02,b3=-1.556989798598866e+02,
+        b4=6.680131188771972e+01,b5=-1.328068155288572e+01;
+  const c1=-7.784894002430293e-03,c2=-3.223964580411365e-01,c3=-2.400758277161838e+00,
+        c4=-2.549732539343734e+00,c5=4.374664141464968e+00,c6=2.938163982698783e+00;
+  const d1=7.784695709041462e-03,d2=3.224671290700398e-01,d3=2.445134137142996e+00,
+        d4=3.754408661907416e+00;
+  const p_low=0.02425,p_high=1-p_low;
+  let q,r;
+  if(p<p_low){
+    q=Math.sqrt(-2*Math.log(p));
+    return (((((c1*q+c2)*q+c3)*q+c4)*q+c5)*q+c6)/((((d1*q+d2)*q+d3)*q+d4)*q+1);
+  }else if(p<=p_high){
+    q=p-0.5; r=q*q;
+    return (((((a1*r+a2)*r+a3)*r+a4)*r+a5)*r+a6)*q/(((((b1*r+b2)*r+b3)*r+b4)*r+b5)*r+1);
+  }else{
+    q=Math.sqrt(-2*Math.log(1-p));
+    return -(((((c1*q+c2)*q+c3)*q+c4)*q+c5)*q+c6)/((((d1*q+d2)*q+d3)*q+d4)*q+1);
+  }
+}
+function sigmaKakal(jumlahLTI){
+  let p=(1000000-jumlahLTI)/1000000;
+  p=Math.min(Math.max(p,1e-10),1-1e-10); // clamp supaya tidak NaN/Infinity di kasus ekstrem
+  return normsinv(p)+1.5;
+}
+function latestWeek(){return Math.max(...allData.map(d=>weekNum(d.tgl)));}
+
+// ══ FILTER STATE ══
+let curFilter='ytd';
+function getNowMonth(){
+  const months = Object.keys(JAM_BULAN).map(Number);
+  return months.length ? Math.max(...months) : (new Date()).getMonth()+1;
+}
+function getFiltered(){
+  if(curFilter==='ytd') return allData;
+  if(curFilter==='mtd') return allData.filter(d=>getMonth(d.tgl)===getNowMonth());
+  if(curFilter==='weekly') return allData.filter(d=>weekNum(d.tgl)===latestWeek());
+  return allData;
+}
+function getJam(){
+  const avgJam = JAM_YTD / (Object.keys(JAM_BULAN).length||1);
+  if(curFilter==='ytd') return JAM_YTD;
+  if(curFilter==='mtd') return JAM_BULAN[getNowMonth()]||avgJam;
+  return Math.round((JAM_BULAN[getNowMonth()]||avgJam)/4);
+}
+function setFilter(f,btn){
+  document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  curFilter=f;
+  updateAnalytics();
+}
+
+// ══ COLORS / THEME ══
+const isDark=window.matchMedia('(prefers-color-scheme:dark)').matches;
+const gc=isDark?'rgba(255,255,255,0.07)':'rgba(0,0,0,0.07)';
+const tc='#888680';
+const PALETTE=['#2870c2','#d93535','#4e8c12','#b06d10','#8040c0','#0a8a9a','#c04080','#888680','#e07010','#207060'];
+
+// ══ CHART INSTANCES ══
+let trendInst,accInst,hkoInst,deptInst,ltiInst,jenisInst,lokasiInst;
+let curTrendTab='fr_lti';
+
+// Monthly static data
+// ══ STATISTIK BULANAN (dihitung dinamis dari allData + JAM_BULAN, bukan hardcode) ══
+let months=[], frLTI=[], frTotal=[], srData=[], ltiMon=[], nonMon=[], hkoMon=[];
+const MONTH_LABELS=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+
+function computeMonthlyStats(){
+  months=[]; frLTI=[]; frTotal=[]; srData=[]; ltiMon=[]; nonMon=[]; hkoMon=[];
+  const bulanAda = Object.keys(JAM_BULAN).map(Number).sort((a,b)=>a-b);
+  bulanAda.forEach(b=>{
+    const jam = JAM_BULAN[b]||0;
+    const row = JAM_ROWS.find(r=>r.bulan===b);
+    const isEstimasi = row ? !!row.is_estimasi : false;
+    const dataBulan = allData.filter(d=>getMonth(d.tgl)===b);
+    const ltiArr = dataBulan.filter(isLTI);
+    const nonArr = dataBulan.filter(d=>!isLTI(d));
+    const hko = dataBulan.reduce((s,d)=>s+(parseFloat(d.hko)||0),0);
+
+    months.push(MONTH_LABELS[b-1]+(isEstimasi?'*':''));
+    ltiMon.push(ltiArr.length);
+    nonMon.push(nonArr.length);
+    hkoMon.push(Math.round(hko*10)/10);
+    frLTI.push(jam>0?Math.round((ltiArr.length/jam*1e6)*100)/100:0);
+    frTotal.push(jam>0?Math.round(((ltiArr.length+nonArr.length)/jam*1e6)*100)/100:0);
+    srData.push(jam>0?Math.round((hko/jam*1e6)*100)/100:0);
+  });
+}
+
+const trendNotes={
+  fr_lti:'FR LTI = (Jumlah kasus LTI per bulan ÷ Jam Kerja Nyata bulan itu) × 1.000.000 | LTI = Lost Time Injury (Hari Kerja Hilang ≥ 0,5 hari) | *Bulan dengan jam kerja masih estimasi sementara',
+  fr_total:'FR Total = (Semua kasus WR per bulan ÷ Jam Kerja Nyata bulan itu) × 1.000.000 | Mencakup LTI + Non-LTI | *Bulan dengan jam kerja masih estimasi sementara',
+  sr:'SR = (Total Hari Kerja Hilang per bulan ÷ Jam Kerja Nyata bulan itu) × 1.000.000 | Ukuran keparahan kecelakaan | *Bulan dengan jam kerja masih estimasi sementara'
+};
+
+// ══ TREND CHART ══
+function switchTab(type,btn){
+  curTrendTab=type;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  if(trendInst) trendInst.destroy();
+  const ctx=document.getElementById('trendChart').getContext('2d');
+  let vals,target,color,yMax,lbl,targetVal;
+  if(type==='fr_lti'){
+    vals=frLTI; targetVal=6.20; color='#2870c2'; lbl='FR LTI';
+  } else if(type==='fr_total'){
+    vals=frTotal; targetVal=6.20; color='#8040c0'; lbl='FR Total';
+  } else {
+    vals=srData; targetVal=40; color='#4e8c12'; lbl='SR';
+  }
+  target=months.map(()=>targetVal);
+  const maxVal=Math.max(targetVal,...vals,1);
+  yMax=Math.ceil(maxVal*1.25/5)*5; // beri ruang 25% di atas nilai tertinggi, dibulatkan ke kelipatan 5
+  document.getElementById('trend-note').textContent=trendNotes[type];
+
+  trendInst=new Chart(ctx,{
+    type:'line',
+    data:{labels:months,datasets:[
+      {label:lbl,data:vals,borderColor:color,backgroundColor:color+'25',fill:true,
+       tension:.35,pointRadius:6,pointBackgroundColor:color,borderWidth:2.5,
+       datalabels:{display:true,align:'top',anchor:'top',color:color,
+                   font:{size:12,weight:'bold'},formatter:v=>v===0?'0':v.toFixed(2)}},
+      {label:'Target',data:target,borderColor:'#d93535',borderDash:[7,4],
+       borderWidth:1.5,pointRadius:0,fill:false,datalabels:{display:false}}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{display:false},ticks:{color:tc,font:{size:11},autoSkip:false}},
+        y:{grid:{color:gc},ticks:{color:tc,font:{size:11}},min:0,max:yMax}
+      },
+      layout:{padding:{top:28}}
+    }
+  });
+}
+
+// ══ ANALYTICS UPDATE ══
+function updateAnalytics(){
+  const data=getFiltered();
+  const ltiArr=data.filter(isLTI);
+  const nonArr=data.filter(d=>!isLTI(d));
+  const totalHKO=data.reduce((s,d)=>s+(parseFloat(d.hko)||0),0);
+  const jam=getJam();
+  const fr=ltiArr.length>0?((ltiArr.length/jam)*1e6).toFixed(2):'0.00';
+  const sr=((totalHKO/jam)*1e6).toFixed(2);
+
+  const periodLbl=curFilter==='ytd'?'YTD 2026':curFilter==='mtd'?'MTD Mei 2026':'Minggu W'+String(latestWeek()).padStart(2,'0');
+  document.getElementById('f-info').textContent='→ '+data.length+' kasus ditampilkan';
+  document.getElementById('log-period-lbl').textContent=periodLbl;
+  document.getElementById('log-lbl2').textContent=periodLbl;
+  document.getElementById('log-count').textContent='Menampilkan '+data.length+' kasus';
+
+  document.getElementById('a-total').textContent=data.length;
+  document.getElementById('a-lti-sub').textContent='LTI: '+ltiArr.length+' | Non-LTI: '+nonArr.length;
+  document.getElementById('a-hko').textContent=totalHKO.toFixed(1);
+  document.getElementById('a-fr').textContent=fr;
+  document.getElementById('a-sr').textContent=sr;
+
+  buildDeptChart(data);
+  buildLTIChart(data);
+  buildJenisChart(data);
+  buildLokasiChart(data);
+  buildWeekHighlight();
+  buildCaseTable(data);
+}
+
+function buildDeptChart(data){
+  const counts={};
+  data.forEach(d=>{counts[d.subdep]=(counts[d.subdep]||0)+1;});
+  const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  if(deptInst) deptInst.destroy();
+  deptInst=new Chart(document.getElementById('deptChart'),{
+    type:'bar',
+    data:{labels:sorted.map(e=>e[0]),datasets:[{
+      data:sorted.map(e=>e[1]),
+      backgroundColor:PALETTE.slice(0,sorted.length),
+      borderRadius:4
+    }]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},datalabels:{
+        display:true,anchor:'end',align:'right',
+        color:'#333',font:{size:11,weight:'bold'},
+        formatter:v=>v
+      }},
+      layout:{padding:{right:24}},
+      scales:{
+        x:{grid:{color:gc},ticks:{color:tc,font:{size:10},stepSize:1},min:0},
+        y:{grid:{display:false},ticks:{color:tc,font:{size:10}}}
+      }
+    }
+  });
+}
+
+function buildLTIChart(data){
+  const ltiC=data.filter(isLTI).length;
+  const nonC=data.filter(d=>!isLTI(d)).length;
+  if(ltiInst) ltiInst.destroy();
+  ltiInst=new Chart(document.getElementById('ltiChart'),{
+    type:'doughnut',
+    data:{
+      labels:['LTI — Hari Kerja Hilang','Non-LTI — Tanpa Hari Kerja Hilang'],
+      datasets:[{data:[ltiC,nonC],backgroundColor:['#d93535cc','#4e8c12cc'],
+                 borderWidth:0,hoverOffset:5}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,cutout:'58%',
+      plugins:{
+        legend:{display:true,position:'bottom',labels:{font:{size:10},color:tc,boxWidth:10,padding:6}},
+        datalabels:{display:true,color:'#fff',font:{size:13,weight:'bold'},
+                    formatter:(v,ctx)=>{
+                      const total=ctx.chart.data.datasets[0].data.reduce((a,b)=>a+b,0);
+                      return total>0?v+' ('+Math.round(v/total*100)+'%)':'';
+                    }}
+      }
+    }
+  });
+}
+
+function buildJenisChart(data){
+  const counts={};
+  data.forEach(d=>{const j=d.jenis||'Lain-lain';counts[j]=(counts[j]||0)+1;});
+  const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  if(jenisInst) jenisInst.destroy();
+  jenisInst=new Chart(document.getElementById('jenisChart'),{
+    type:'bar',
+    data:{labels:sorted.map(e=>e[0]),datasets:[{
+      data:sorted.map(e=>e[1]),
+      backgroundColor:PALETTE.slice(0,sorted.length),
+      borderRadius:4
+    }]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},datalabels:{
+        display:true,anchor:'end',align:'right',
+        color:'#333',font:{size:11,weight:'bold'},
+        formatter:v=>v
+      }},
+      layout:{padding:{right:24}},
+      scales:{
+        x:{grid:{color:gc},ticks:{color:tc,font:{size:10},stepSize:1},min:0},
+        y:{grid:{display:false},ticks:{color:tc,font:{size:10}}}
+      }
+    }
+  });
+}
+
+function buildLokasiChart(data){
+  const counts={};
+  data.forEach(d=>{
+    let l=d.lokasi||'Tidak diketahui';
+    if(l.length>30) l=l.substring(0,29)+'…';
+    counts[l]=(counts[l]||0)+1;
+  });
+  const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  if(lokasiInst) lokasiInst.destroy();
+  lokasiInst=new Chart(document.getElementById('lokasiChart'),{
+    type:'bar',
+    data:{labels:sorted.map(e=>e[0]),datasets:[{
+      data:sorted.map(e=>e[1]),
+      backgroundColor:'#b06d10cc',
+      borderRadius:4
+    }]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},datalabels:{
+        display:true,anchor:'end',align:'right',
+        color:'#333',font:{size:11,weight:'bold'},
+        formatter:v=>v
+      }},
+      layout:{padding:{right:24}},
+      scales:{
+        x:{grid:{color:gc},ticks:{color:tc,font:{size:10},stepSize:1},min:0},
+        y:{grid:{display:false},ticks:{color:tc,font:{size:10}}}
+      }
+    }
+  });
+}
+
+// ══ WEEK HIGHLIGHT ══
+function buildWeekHighlight(){
+  // Tampilkan kasus dalam rentang 7 hari kalender terakhir (dihitung dari tanggal kasus terbaru)
+  const allDates=allData.map(d=>new Date(d.tgl));
+  const maxDate=new Date(Math.max(...allDates));
+  const minRangeDate=new Date(maxDate); minRangeDate.setDate(maxDate.getDate()-6);
+
+  const wdata=[...allData].filter(d=>{
+    const dt=new Date(d.tgl);
+    return dt>=minRangeDate && dt<=maxDate;
+  }).sort((a,b)=>new Date(b.tgl)-new Date(a.tgl));
+
+  const lw=weekNum(maxDate.toISOString().slice(0,10));
+  const lw2=weekNum(minRangeDate.toISOString().slice(0,10));
+  const fmtOpts={day:'2-digit',month:'short',year:'2-digit'};
+  const dates=wdata.map(d=>new Date(d.tgl)).sort((a,b)=>a-b);
+  const wRangeLabel=dates.length?
+    dates[0].toLocaleDateString('id-ID',fmtOpts)+' – '+dates[dates.length-1].toLocaleDateString('id-ID',fmtOpts)
+    :minRangeDate.toLocaleDateString('id-ID',fmtOpts)+' – '+maxDate.toLocaleDateString('id-ID',fmtOpts);
+  const wkLbl=lw2===lw?String(lw).padStart(2,'0'):String(lw2).padStart(2,'0')+'-'+String(lw).padStart(2,'0');
+  const wLabel='Minggu ke-'+wkLbl+' ('+minRangeDate.toLocaleDateString('id-ID',fmtOpts)+' – '+maxDate.toLocaleDateString('id-ID',fmtOpts)+')';
+
+  document.getElementById('wh-title').textContent='🔔 Highlight Kasus — '+wLabel;
+  document.getElementById('wh-sub').textContent='Kasus Work Related yang tercatat pada 7 hari kalender terakhir yang ada datanya (otomatis terdeteksi)';
+  document.getElementById('badge-week').textContent='📅 Update: '+wLabel;
+  document.getElementById('wh-badge').textContent=wdata.length+(wdata.length===1?' kasus':' kasus');
+
+  const isAdmin = AUTH_ROLE==='admin';
+  document.getElementById('wh-act-th').style.display = isAdmin?'':'none';
+
+  const tbody=document.getElementById('wh-tbody');
+  if(wdata.length===0){
+    tbody.innerHTML='<tr><td colspan="'+(isAdmin?10:9)+'"><div class="wh-empty">Tidak ada kasus pada minggu ini.</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML=wdata.map((d,i)=>{
+    const hko=parseFloat(d.hko)||0;
+    const pill=hko>=0.5?'<span class="pill p-lti">LTI</span>':'<span class="pill p-nlti">Non-LTI</span>';
+    const tgl=new Date(d.tgl).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'2-digit'});
+    const actCell = isAdmin ? `<td class="act-col">
+        <button class="btn-mini btn-mini-edit" onclick="openKasusModal('${d.id}')">Edit</button>
+        <button class="btn-mini btn-mini-del" onclick="deleteKasus('${d.id}','${esc(d.nama)}')">Hapus</button>
+      </td>` : '';
+    return `<tr>
+      <td style="color:var(--t3);font-size:10px">${i+1}</td>
+      <td style="white-space:nowrap">${tgl}</td>
+      <td><strong>${esc(d.nama)}</strong></td>
+      <td>${esc(d.subdep)}</td>
+      <td><span style="font-size:11px">${esc(d.jenis||'—')}</span></td>
+      <td style="font-size:11px;color:var(--t2)">${esc(d.kronologi)}</td>
+      <td style="font-size:11px">${esc(d.lokasi)}</td>
+      <td>${pill}</td>
+      <td style="text-align:center">${hko>0?'<strong style="color:var(--red)">'+hko+'</strong>':'<span style="color:var(--t3)">0</span>'}</td>
+      ${actCell}
+    </tr>`;
+  }).join('');
+}
+
+// ══ CASE TABLE ══
+function buildCaseTable(data){
+  const sorted=[...data].sort((a,b)=>new Date(b.tgl)-new Date(a.tgl));
+  const tbody=document.getElementById('case-tbody');
+  const isAdmin = AUTH_ROLE==='admin';
+  document.getElementById('log-act-th').style.display = isAdmin?'':'none';
+
+  if(sorted.length===0){
+    tbody.innerHTML='<tr><td colspan="'+(isAdmin?11:10)+'"><div class="empty-st">Tidak ada kasus untuk periode ini.</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML=sorted.map((d,i)=>{
+    const hko=parseFloat(d.hko)||0;
+    const pill=hko>=0.5?'<span class="pill p-lti">LTI</span>':'<span class="pill p-nlti">Non-LTI</span>';
+    const tgl=new Date(d.tgl).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'2-digit'});
+    const actCell = isAdmin ? `<td class="act-col" style="text-align:center">
+        <button class="btn-mini btn-mini-edit" onclick="openKasusModal('${d.id}')">Edit</button>
+        <button class="btn-mini btn-mini-del" onclick="deleteKasus('${d.id}','${esc(d.nama)}')">Hapus</button>
+      </td>` : '';
+    return `<tr>
+      <td style="color:var(--t3);font-size:10px">${i+1}</td>
+      <td style="white-space:nowrap;font-size:11px">${tgl}</td>
+      <td style="font-size:11px;color:var(--t2)">${weekLabel(d.tgl)}</td>
+      <td><strong style="font-weight:600">${esc(d.nama)}</strong></td>
+      <td style="font-size:11px">${esc(d.subdep)}</td>
+      <td style="font-size:11px"><span style="background:var(--sf2);padding:1px 6px;border-radius:4px">${esc(d.jenis||'—')}</span></td>
+      <td style="font-size:11px;color:var(--t2)">${esc(d.kronologi)}</td>
+      <td style="font-size:11px">${esc(d.lokasi)}</td>
+      <td style="text-align:center">${pill}</td>
+      <td style="text-align:center">${hko>0?'<strong style="color:var(--red)">'+hko+'</strong>':'<span style="color:var(--t3)">0</span>'}</td>
+      ${actCell}
+    </tr>`;
+  }).join('');
+}
+
+// ══ EXPORT CSV ══
+function exportCSV(){
+  const data=getFiltered();
+  const hdr='No,Tanggal,Minggu,Nama,Sub-Departemen,Jenis Kejadian,Kronologi,Lokasi,Klasifikasi,HKO Hilang';
+  const rows=data.map((d,i)=>[i+1,d.tgl,weekLabel(d.tgl),
+    '"'+d.nama+'"','"'+d.subdep+'"','"'+(d.jenis||'-')+'"',
+    '"'+d.kronologi.replace(/"/g,'""')+'"','"'+(d.lokasi||'-')+'"',
+    isLTI(d)?'LTI':'Non-LTI',d.hko||0].join(','));
+  const csv=[hdr,...rows].join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download='HSE_Kasus_'+curFilter.toUpperCase()+'.csv';
+  a.click();
+}
+
+// ══ TOAST NOTIFICATION ══
+let toastTimer=null;
+function showToast(msg,isErr){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className=isErr?'show err':'show';
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>{ t.className=''; },3200);
+}
+
+// ══ MODAL HELPERS ══
+function closeModal(id){
+  document.getElementById(id).classList.remove('show');
+}
+
+// ══ CRUD: KASUS ══
+function openKasusModal(id){
+  document.getElementById('kasus-err').textContent='';
+  document.getElementById('kasus-id').value='';
+  if(id){
+    const d=allData.find(x=>String(x.id)===String(id));
+    if(!d){ showToast('Data tidak ditemukan',true); return; }
+    document.getElementById('modal-kasus-title').textContent='Edit Kasus';
+    document.getElementById('kasus-id').value=d.id;
+    document.getElementById('kasus-tgl').value=d.tgl;
+    document.getElementById('kasus-hko').value=d.hko;
+    document.getElementById('kasus-nama').value=d.nama;
+    document.getElementById('kasus-subdep').value=d.subdep||'';
+    document.getElementById('kasus-jenis').value=d.jenis||'Lain-lain';
+    document.getElementById('kasus-lokasi').value=d.lokasi||'';
+    document.getElementById('kasus-kronologi').value=d.kronologi||'';
+  }else{
+    document.getElementById('modal-kasus-title').textContent='Tambah Kasus Baru';
+    document.getElementById('kasus-tgl').value='';
+    document.getElementById('kasus-hko').value='';
+    document.getElementById('kasus-nama').value='';
+    document.getElementById('kasus-subdep').value='';
+    document.getElementById('kasus-jenis').value='Lain-lain';
+    document.getElementById('kasus-lokasi').value='';
+    document.getElementById('kasus-kronologi').value='';
+  }
+  document.getElementById('modal-kasus').classList.add('show');
+}
+
+async function submitKasus(){
+  const errEl=document.getElementById('kasus-err');
+  const btn=document.getElementById('kasus-save-btn');
+  errEl.textContent='';
+
+  const id=document.getElementById('kasus-id').value;
+  const payload={
+    tgl: document.getElementById('kasus-tgl').value,
+    nama: document.getElementById('kasus-nama').value.trim(),
+    subdep: document.getElementById('kasus-subdep').value.trim(),
+    jenis: document.getElementById('kasus-jenis').value,
+    lokasi: document.getElementById('kasus-lokasi').value.trim(),
+    kronologi: document.getElementById('kasus-kronologi').value.trim(),
+    hko: document.getElementById('kasus-hko').value
+  };
+
+  if(!payload.tgl){ errEl.textContent='Tanggal wajib diisi.'; return; }
+  if(!payload.nama){ errEl.textContent='Nama wajib diisi.'; return; }
+  if(payload.hko===''||isNaN(parseFloat(payload.hko))){ errEl.textContent='HKO wajib diisi (boleh 0).'; return; }
+
+  btn.disabled=true; btn.textContent='Menyimpan...';
+  try{
+    const method=id?'PUT':'POST';
+    if(id) payload.id=id;
+    const r=await fetch(API_BASE,{method,headers:authHeaders(),body:JSON.stringify(payload)});
+    const j=await r.json();
+    if(!r.ok) throw new Error(j.error||'Gagal menyimpan data');
+    closeModal('modal-kasus');
+    showToast(id?'Kasus berhasil diperbarui':'Kasus baru berhasil ditambahkan');
+    await fetchAllData();
+    renderAll();
+  }catch(e){
+    errEl.textContent=e.message;
+  }finally{
+    btn.disabled=false; btn.textContent='Simpan';
+  }
+}
+
+async function deleteKasus(id,nama){
+  if(!confirm('Hapus kasus "'+nama+'"? Tindakan ini tidak bisa dibatalkan.')) return;
+  try{
+    const r=await fetch(API_BASE,{method:'DELETE',headers:authHeaders(),body:JSON.stringify({id})});
+    const j=await r.json();
+    if(!r.ok) throw new Error(j.error||'Gagal menghapus data');
+    showToast('Kasus berhasil dihapus');
+    await fetchAllData();
+    renderAll();
+  }catch(e){
+    showToast(e.message,true);
+  }
+}
+
+// ══ CRUD: JAM KERJA BULANAN ══
+function openJamModal(){
+  renderJamList();
+  document.getElementById('modal-jam').classList.add('show');
+}
+
+// ══ ROTASI PIN VIEWER ══
+function openRotatePinModal(){
+  document.getElementById('rotate-pin-confirm').style.display='block';
+  document.getElementById('rotate-pin-result').style.display='none';
+  document.getElementById('rotate-pin-err').textContent='';
+  document.getElementById('rotate-pin-btn').disabled=false;
+  document.getElementById('rotate-pin-btn').textContent='Generate PIN Baru';
+
+  const infoEl=document.getElementById('rotate-pin-lastinfo');
+  if(PIN_VIEWER_SET_AT){
+    const d=new Date(PIN_VIEWER_SET_AT);
+    infoEl.textContent='PIN Viewer terakhir diganti: '+d.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})+' pukul '+d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+  }else{
+    infoEl.textContent='Belum ada riwayat penggantian PIN Viewer.';
+  }
+
+  document.getElementById('modal-rotate-pin').classList.add('show');
+}
+
+async function doRotatePin(){
+  const errEl=document.getElementById('rotate-pin-err');
+  const btn=document.getElementById('rotate-pin-btn');
+  errEl.textContent='';
+  btn.disabled=true; btn.textContent='Membuat PIN baru...';
+
+  try{
+    const r=await fetch(API_BASE,{method:'POST',headers:authHeaders(),body:JSON.stringify({type:'rotate_pin'})});
+    const j=await r.json();
+    if(!r.ok) throw new Error(j.error||'Gagal membuat PIN baru');
+
+    document.getElementById('rotate-pin-confirm').style.display='none';
+    document.getElementById('rotate-pin-result').style.display='block';
+    document.getElementById('rotate-pin-newvalue').textContent=j.newPin;
+    PIN_VIEWER_SET_AT=new Date().toISOString();
+    showToast('PIN Viewer berhasil diganti — PIN lama sudah tidak berlaku');
+  }catch(e){
+    errEl.textContent=e.message;
+    btn.disabled=false; btn.textContent='Generate PIN Baru';
+  }
+}
+
+function renderJamList(){
+  const list=document.getElementById('jam-list');
+  const sorted=[...JAM_ROWS].sort((a,b)=>a.bulan-b.bulan);
+  if(sorted.length===0){
+    list.innerHTML='<p style="font-size:11.5px;color:var(--t3)">Belum ada data jam kerja bulanan.</p>';
+  }else{
+    list.innerHTML=sorted.map(r=>`
+      <div class="form-row" style="display:flex;align-items:flex-end;gap:8px;border-bottom:.5px solid var(--bdr);padding-bottom:10px">
+        <div style="flex:0 0 70px"><label>${MONTH_LABELS[r.bulan-1]} ${r.tahun}</label><div style="font-size:10px;color:var(--t3)">Bulan ${r.bulan}</div></div>
+        <div style="flex:1"><input type="number" min="0" value="${r.jam_kerja}" id="jam-val-${r.id}"></div>
+        <div style="display:flex;align-items:center;gap:4px;font-size:10.5px;white-space:nowrap">
+          <input type="checkbox" id="jam-est-${r.id}" ${r.is_estimasi?'checked':''}> Estimasi
+        </div>
+        <button class="btn-mini btn-mini-edit" onclick="saveJamRow('${r.id}')">Simpan</button>
+      </div>`).join('');
+  }
+
+  // Form tambah bulan baru
+  const existingBulan=sorted.map(r=>r.bulan);
+  const opsiBulan=MONTH_LABELS.map((m,i)=>i+1).filter(b=>!existingBulan.includes(b));
+  if(opsiBulan.length){
+    list.innerHTML+=`
+      <div class="form-row" style="display:flex;align-items:flex-end;gap:8px;margin-top:12px">
+        <div style="flex:0 0 90px">
+          <label>Tambah bulan</label>
+          <select id="jam-new-bulan">${opsiBulan.map(b=>'<option value="'+b+'">'+MONTH_LABELS[b-1]+'</option>').join('')}</select>
+        </div>
+        <div style="flex:1"><label>Jam kerja</label><input type="number" min="0" id="jam-new-val" placeholder="mis. 700000"></div>
+        <div style="display:flex;align-items:center;gap:4px;font-size:10.5px;white-space:nowrap;padding-bottom:9px">
+          <input type="checkbox" id="jam-new-est" checked> Estimasi
+        </div>
+        <button class="btn-mini btn-mini-edit" onclick="addJamRow()">Tambah</button>
+      </div>`;
+  }
+}
+
+async function saveJamRow(id){
+  const errEl=document.getElementById('jam-err'); errEl.textContent='';
+  const jam_kerja=parseFloat(document.getElementById('jam-val-'+id).value);
+  const is_estimasi=document.getElementById('jam-est-'+id).checked;
+  if(isNaN(jam_kerja)||jam_kerja<0){ errEl.textContent='Jam kerja harus angka positif.'; return; }
+  try{
+    const r=await fetch(API_BASE,{method:'PUT',headers:authHeaders(),body:JSON.stringify({type:'jam_kerja',id,jam_kerja,is_estimasi})});
+    const j=await r.json();
+    if(!r.ok) throw new Error(j.error||'Gagal menyimpan jam kerja');
+    showToast('Jam kerja berhasil diperbarui');
+    await fetchAllData();
+    renderJamList();
+    renderAll();
+  }catch(e){ errEl.textContent=e.message; }
+}
+
+async function addJamRow(){
+  const errEl=document.getElementById('jam-err'); errEl.textContent='';
+  const bulan=parseInt(document.getElementById('jam-new-bulan').value,10);
+  const jam_kerja=parseFloat(document.getElementById('jam-new-val').value);
+  const is_estimasi=document.getElementById('jam-new-est').checked;
+  if(isNaN(jam_kerja)||jam_kerja<0){ errEl.textContent='Jam kerja harus angka positif.'; return; }
+  try{
+    const r=await fetch(API_BASE,{method:'POST',headers:authHeaders(),body:JSON.stringify({type:'jam_kerja',tahun:2026,bulan,jam_kerja,is_estimasi})});
+    const j=await r.json();
+    if(!r.ok) throw new Error(j.error||'Gagal menambah jam kerja');
+    showToast('Bulan baru berhasil ditambahkan');
+    await fetchAllData();
+    renderJamList();
+    renderAll();
+  }catch(e){ errEl.textContent=e.message; }
+}
+
+
+
+// ══ RENDER ALL — update KPI atas dari data allData ══
+function renderAll(){
+  // Hitung YTD dari seluruh data (Supabase)
+  const ytdData = allData;
+  const ytdLTI  = ytdData.filter(isLTI);
+  const ytdNon  = ytdData.filter(d=>!isLTI(d));
+  const ytdHKO  = ytdData.reduce((s,d)=>s+(parseFloat(d.hko)||0),0);
+  const ytdFR   = JAM_YTD>0 ? ((ytdLTI.length/JAM_YTD)*1e6).toFixed(2) : '0.00';
+  const ytdSR   = JAM_YTD>0 ? ((ytdHKO/JAM_YTD)*1e6).toFixed(2) : '0.00';
+
+  // Update KPI cards bagian atas
+  document.getElementById('kpi-fr').textContent  = ytdFR;
+  document.getElementById('kpi-sr').textContent  = ytdSR;
+  document.getElementById('kpi-lti').textContent = ytdLTI.length;
+  document.getElementById('kpi-hko').textContent = ytdHKO.toFixed(1);
+  document.getElementById('kpi-nolti-sub').textContent = '+ '+ytdNon.length+' Non-LTI = '+ytdData.length+' total WR';
+  document.getElementById('kpi-hko-sub').textContent   = 'hari kerja hilang akumulatif';
+
+  // KPI Jam Kerja Nyata (dinamis dari JAM_BULAN)
+  document.getElementById('kpi-jam').textContent = (JAM_YTD/1e6).toFixed(2)+'M';
+  const bulanList = Object.keys(JAM_BULAN).map(Number).sort((a,b)=>a-b);
+  let periodeTxt='—';
+  if(bulanList.length){
+    const first=MONTH_LABELS[bulanList[0]-1], last=MONTH_LABELS[bulanList[bulanList.length-1]-1];
+    periodeTxt = (first===last?first:first+'–'+last)+' 2026';
+    document.getElementById('kpi-jam-sub').textContent = 'Akumulatif '+periodeTxt;
+    document.getElementById('hdr-period').textContent = 'Periode: '+periodeTxt+' · Data kumulatif s/d minggu terakhir';
+  }
+
+  // KPI Sigma Kakal = NORMSINV((1.000.000 - Jumlah LTI) / 1.000.000) + 1,5
+  const sigma = sigmaKakal(ytdLTI.length);
+  document.getElementById('kpi-sigma').textContent = isFinite(sigma) ? sigma.toFixed(2) : '—';
+  document.getElementById('kpi-sigma-sub').textContent = 'Akumulatif '+periodeTxt+' · basis '+ytdLTI.length+' LTI';
+
+  // Update badges header
+  const TARGET_FR=6.20, TARGET_SR=40.00;
+  const frOk = parseFloat(ytdFR) <= TARGET_FR;
+  const srOk = parseFloat(ytdSR) <= TARGET_SR;
+  document.getElementById('badge-fr').textContent = 'FR LTI '+ytdFR+' — '+(frOk?'Di bawah target ✓':'MELEBIHI TARGET ⚠️');
+  document.getElementById('badge-fr').className   = 'badge '+(frOk?'bg':'br');
+  document.getElementById('badge-sr').textContent = 'SR '+ytdSR+' — '+(srOk?'Di bawah target ✓':'MELEBIHI TARGET ⚠️');
+  document.getElementById('badge-sr').className   = 'badge '+(srOk?'bg':'br');
+
+  // Update progress bar FR
+  const frPct = Math.min((parseFloat(ytdFR)/TARGET_FR)*100,100).toFixed(0);
+  document.getElementById('prog-fr').textContent = ytdFR;
+  document.getElementById('prog-fr').style.color = frOk?'var(--green)':'var(--red)';
+  document.getElementById('prog-fr-lbl').textContent = ytdFR+' / '+TARGET_FR.toFixed(2)+' ('+frPct+'%)';
+  document.getElementById('prog-fr-fill').style.width = frPct+'%';
+  document.getElementById('prog-fr-fill').style.background = frOk?'var(--blue)':'var(--red)';
+  document.getElementById('prog-fr-remain').textContent = Math.max(TARGET_FR-parseFloat(ytdFR),0).toFixed(2);
+  document.getElementById('prog-fr-remain').style.color = frOk?'var(--green)':'var(--red)';
+
+  // Update progress bar SR
+  const srPct = Math.min((parseFloat(ytdSR)/TARGET_SR)*100,100).toFixed(1);
+  document.getElementById('prog-sr').textContent = ytdSR;
+  document.getElementById('prog-sr').style.color = srOk?'var(--green)':'var(--red)';
+  document.getElementById('prog-sr-lbl').textContent = ytdSR+' / '+TARGET_SR.toFixed(2)+' ('+srPct+'%)';
+  document.getElementById('prog-sr-fill').style.width = srPct+'%';
+  document.getElementById('prog-sr-fill').style.background = srOk?'var(--green)':'var(--red)';
+  document.getElementById('prog-sr-remain').textContent = Math.max(TARGET_SR-parseFloat(ytdSR),0).toFixed(2);
+  document.getElementById('prog-sr-remain').style.color = srOk?'var(--green)':'var(--red)';
+
+  // Hitung statistik bulanan dulu (dipakai untuk catatan "tertinggi/terberat")
+  computeMonthlyStats();
+
+  if(months.length){
+    let maxFrIdx=0, maxSrIdx=0;
+    frLTI.forEach((v,i)=>{ if(v>frLTI[maxFrIdx]) maxFrIdx=i; });
+    srData.forEach((v,i)=>{ if(v>srData[maxSrIdx]) maxSrIdx=i; });
+    document.getElementById('prog-fr-note').textContent =
+      'FR LTI tertinggi: '+months[maxFrIdx].replace('*','')+' '+frLTI[maxFrIdx].toFixed(2)+
+      ' — '+ltiMon[maxFrIdx]+' kasus LTI dengan '+hkoMon[maxFrIdx]+' HKO hilang';
+    document.getElementById('prog-sr-note').textContent =
+      'SR terberat: '+months[maxSrIdx].replace('*','')+' '+srData[maxSrIdx].toFixed(2)+
+      ' — '+hkoMon[maxSrIdx]+' hari kerja hilang dari '+ltiMon[maxSrIdx]+' kasus LTI';
+  }
+
+  buildMonthlyCharts();
+  updateMonthlyTable();
+
+  // Lanjut update analitik bawah
+  updateAnalytics();
+}
+
+// ══ INIT — semua chart dibuat setelah DOM siap ══
+function buildMonthlyCharts(){
+  if(accInst) accInst.destroy();
+  if(hkoInst) hkoInst.destroy();
+
+  accInst=new Chart(document.getElementById('accChart'),{
+    type:'bar',
+    data:{labels:months,datasets:[
+      {label:'LTI (Hari Kerja Hilang)',data:ltiMon,backgroundColor:'#d93535cc',borderRadius:3},
+      {label:'Non-LTI (Tanpa Hari Kerja Hilang)',data:nonMon,backgroundColor:'#4e8c12cc',borderRadius:3}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'top',labels:{font:{size:10},color:tc,boxWidth:10,padding:8}},
+               datalabels:{display:false}},
+      scales:{x:{stacked:true,grid:{display:false},ticks:{color:tc,font:{size:11},autoSkip:false}},
+              y:{stacked:true,grid:{color:gc},ticks:{color:tc,font:{size:11},stepSize:1}}}}
+  });
+
+  hkoInst=new Chart(document.getElementById('hkoChart'),{
+    type:'bar',
+    data:{labels:months,datasets:[{label:'HKO Hilang (hari)',data:hkoMon,
+      backgroundColor:'#d9353588',borderColor:'#d93535',borderWidth:1.5,borderRadius:3}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},datalabels:{display:false},
+               tooltip:{callbacks:{label:c=>c.parsed.y+' hari kerja hilang'}}},
+      scales:{x:{grid:{display:false},ticks:{color:tc,font:{size:11},autoSkip:false}},
+              y:{grid:{color:gc},ticks:{color:tc,font:{size:11}}}}}
+  });
+
+  switchTab(curTrendTab,document.querySelector('.tab.active'));
+}
+
+function updateMonthlyTable(){
+  const TARGET_FR=6.20, TARGET_SR=40.00;
+  const head=document.getElementById('mtbl-head');
+  const body=document.getElementById('mtbl-body');
+  const foot=document.getElementById('mtbl-footnote');
+
+  head.innerHTML='<th>Metrik</th>'+months.map(m=>'<th>'+m+'</th>').join('')+'<th>Akumulatif</th>';
+
+  const totLTI=ltiMon.reduce((a,b)=>a+b,0);
+  const totNon=nonMon.reduce((a,b)=>a+b,0);
+  const totHKO=Math.round(hkoMon.reduce((a,b)=>a+b,0)*10)/10;
+  const totFR=JAM_YTD>0?Math.round((totLTI/JAM_YTD*1e6)*100)/100:0;
+  const totFRTotal=JAM_YTD>0?Math.round(((totLTI+totNon)/JAM_YTD*1e6)*100)/100:0;
+  const totSR=JAM_YTD>0?Math.round((totHKO/JAM_YTD*1e6)*100)/100:0;
+
+  function cellClass(val,thresholds){ // thresholds = [warnAt, dangerAt]
+    if(val>=thresholds[1]) return 'danger';
+    if(val>=thresholds[0]) return 'warn';
+    return '';
+  }
+
+  const rows=[];
+  rows.push('<tr><td>Kecelakaan LTI <span style="font-size:10px;color:var(--t3)">(HKO ≥ 0,5 hari)</span></td>'+
+    ltiMon.map(v=>'<td class="'+(v>=3?'warn':'')+'">'+v+'</td>').join('')+'<td><strong>'+totLTI+'</strong></td></tr>');
+  rows.push('<tr><td>Kecelakaan Non-LTI <span style="font-size:10px;color:var(--t3)">(HKO = 0)</span></td>'+
+    nonMon.map(v=>'<td>'+v+'</td>').join('')+'<td><strong>'+totNon+'</strong></td></tr>');
+  rows.push('<tr><td>Total WR <span style="font-size:10px;color:var(--t3)">(LTI + Non-LTI)</span></td>'+
+    ltiMon.map((v,i)=>{const t=v+nonMon[i];return '<td class="'+(t>=12?'danger':t>=8?'warn':'')+'">'+t+'</td>';}).join('')+
+    '<td><strong>'+(totLTI+totNon)+'</strong></td></tr>');
+  rows.push('<tr><td>HKO Hilang <span style="font-size:10px;color:var(--t3)">(hari kerja operasi)</span></td>'+
+    hkoMon.map(v=>'<td class="'+(v>=6?'danger':v>=3?'warn':'')+'">'+v+'</td>').join('')+
+    '<td><strong>'+totHKO+'</strong></td></tr>');
+  rows.push('<tr><td>FR LTI <span style="font-size:10px;color:var(--t3)">(Frequency Rate, hanya LTI)</span></td>'+
+    frLTI.map(v=>'<td class="'+(v>TARGET_FR?'danger':'ok')+'">'+v.toFixed(2)+'</td>').join('')+
+    '<td class="'+(totFR>TARGET_FR?'danger':'ok')+'"><strong>'+totFR.toFixed(2)+'</strong></td></tr>');
+  rows.push('<tr><td>FR Total <span style="font-size:10px;color:var(--t3)">(LTI + Non-LTI)</span></td>'+
+    frTotal.map(v=>'<td class="'+(v>=15?'danger':'')+'">'+v.toFixed(2)+'</td>').join('')+
+    '<td>'+totFRTotal.toFixed(2)+'</td></tr>');
+  rows.push('<tr><td>SR <span style="font-size:10px;color:var(--t3)">(Severity Rate)</span></td>'+
+    srData.map(v=>'<td class="'+(v>TARGET_SR?'danger':'ok')+'">'+v.toFixed(2)+'</td>').join('')+
+    '<td class="'+(totSR>TARGET_SR?'danger':'ok')+'"><strong>'+totSR.toFixed(2)+'</strong></td></tr>');
+  rows.push('<tr><td>Target FR LTI</td>'+months.map(()=>'<td style="color:var(--t3)">'+TARGET_FR.toFixed(2)+'</td>').join('')+'<td style="color:var(--t3)">'+TARGET_FR.toFixed(2)+'</td></tr>');
+  rows.push('<tr><td>Target SR</td>'+months.map(()=>'<td style="color:var(--t3)">'+TARGET_SR.toFixed(2)+'</td>').join('')+'<td style="color:var(--t3)">'+TARGET_SR.toFixed(2)+'</td></tr>');
+
+  body.innerHTML=rows.join('');
+
+  const estimasiBulan=months.filter(m=>m.includes('*'));
+  foot.textContent = estimasiBulan.length
+    ? '*'+estimasiBulan.join(', ')+' = jam kerja masih estimasi sementara, akan disesuaikan dengan jam kerja aktual.'
+    : '';
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  // Chart bulanan & trend akan dibuat oleh buildMonthlyCharts(), dipanggil dari renderAll()
+  // setelah data berhasil diambil dari Supabase (lihat bootApp()).
+});
+</script>
+</body>
+</html>
