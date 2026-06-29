@@ -141,7 +141,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .chart-note{font-size:10px;color:var(--t3);margin-top:6px;font-style:italic}
 
 footer{text-align:center;font-size:11px;color:var(--t3);margin-top:36px;padding-top:14px;border-top:.5px solid var(--bdr)}
-@media print{.hdr-btns,.btn,.act-col,.fab-add{display:none}.page{padding:10px}}
+@media print{.hdr-btns,.btn,.act-col,.fab-add,.quicknav,.back-home-wrap{display:none}.page{padding:10px}}
 
 /* ── PIN GATE ── */
 #pin-gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px}
@@ -195,6 +195,16 @@ footer{text-align:center;font-size:11px;color:var(--t3);margin-top:36px;padding-
 #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:#fff;padding:11px 20px;border-radius:8px;font-size:12.5px;font-weight:600;opacity:0;transition:.25s;z-index:1100;pointer-events:none;max-width:90vw;text-align:center}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 #toast.err{background:var(--red)}
+
+/* ── QUICK NAV ── */
+.quicknav{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 18px;padding:10px 14px;background:var(--sf2);border-radius:var(--rs);border:.5px solid var(--bdr)}
+.quicknav-btn{font-size:12px;font-weight:600;padding:7px 14px;border-radius:20px;border:1px solid var(--blue);background:var(--surface);color:var(--blue-t);cursor:pointer;transition:.15s}
+.quicknav-btn:hover{background:var(--blue);color:#fff}
+
+/* ── BACK TO HOME ── */
+.back-home-wrap{display:flex;justify-content:center;margin:18px 0}
+.back-home-btn{font-size:12px;font-weight:600;padding:8px 18px;border-radius:20px;border:.5px solid var(--bdr);background:var(--sf2);color:var(--t2);cursor:pointer;transition:.15s}
+.back-home-btn:hover{background:var(--surface);border-color:var(--blue);color:var(--blue-t)}
 </style>
 </head>
 <body>
@@ -235,22 +245,41 @@ footer{text-align:center;font-size:11px;color:var(--t3);margin-top:36px;padding-
     </div>
     <div class="form-grid-2">
       <div class="form-row">
-        <label>Sub-Departemen</label>
-        <input type="text" id="kasus-subdep" placeholder="mis. Power Plant">
-      </div>
-      <div class="form-row">
-        <label>Jenis Kejadian</label>
-        <select id="kasus-jenis">
-          <option>Terpeleset/Terjatuh</option>
-          <option>Tertimpa Benda</option>
-          <option>Terjepit</option>
-          <option>Tersayat</option>
-          <option>Tergores</option>
-          <option>Tertusuk</option>
-          <option>Paparan Kimia/Soda</option>
-          <option>Lain-lain</option>
+        <label>Departemen *</label>
+        <select id="kasus-departemen">
+          <option value="">— Pilih Departemen —</option>
+          <option>Cannery</option>
+          <option>Maintenance CN</option>
+          <option>Can Making</option>
+          <option>Concentrate</option>
+          <option>Label</option>
+          <option>Drum Plant</option>
+          <option>Power Plant</option>
+          <option>Biogas</option>
+          <option>Quality Control</option>
+          <option>QA</option>
+          <option>Lab Sentral</option>
+          <option>Factory Keeping</option>
         </select>
       </div>
+      <div class="form-row">
+        <label>Sub-Departemen</label>
+        <input type="text" id="kasus-subdep" placeholder="mis. Processing Cannery">
+        <div class="hint">Bebas diisi, lebih detail dari Departemen</div>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Jenis Kejadian</label>
+      <select id="kasus-jenis">
+        <option>Terpeleset/Terjatuh</option>
+        <option>Tertimpa Benda</option>
+        <option>Terjepit</option>
+        <option>Tersayat</option>
+        <option>Tergores</option>
+        <option>Tertusuk</option>
+        <option>Paparan Kimia/Soda</option>
+        <option>Lain-lain</option>
+      </select>
     </div>
     <div class="form-row">
       <label>Lokasi Kejadian</label>
@@ -330,6 +359,13 @@ footer{text-align:center;font-size:11px;color:var(--t3);margin-top:36px;padding-
     <button class="btn" onclick="window.print()">🖨 Cetak / PDF</button>
     <button class="btn-logout" onclick="logout()">Keluar</button>
   </div>
+</div>
+
+<!-- ══ NAVIGASI CEPAT ══ -->
+<div class="quicknav">
+  <button class="quicknav-btn" onclick="scrollToSection('section-analitik')">📊 Analitik Kecelakaan Kerja</button>
+  <button class="quicknav-btn" onclick="scrollToSection('section-minggu-ini')">🔔 Log Kasus Minggu Ini</button>
+  <button class="quicknav-btn" onclick="scrollToSection('section-log-total')">📋 Log Total</button>
 </div>
 
 
@@ -460,7 +496,7 @@ footer{text-align:center;font-size:11px;color:var(--t3);margin-top:36px;padding-
 </div>
 
 <!-- ══ ANALITIK ══ -->
-<div class="sep"><span>📊 Analitik Kecelakaan Kerja — Weekly / MTD / YTD</span></div>
+<div class="sep" id="section-analitik"><span>📊 Analitik Kecelakaan Kerja — Weekly / MTD / YTD</span></div>
 
 <div class="fbar">
   <label>Periode:</label>
@@ -497,7 +533,7 @@ footer{text-align:center;font-size:11px;color:var(--t3);margin-top:36px;padding-
 <!-- ANA CHARTS: 3 kolom -->
 <div class="r3">
   <div class="card">
-    <div class="ct">Per Sub-Departemen</div>
+    <div class="ct">Per Departemen</div>
     <div style="position:relative;height:210px"><canvas id="deptChart"></canvas></div>
   </div>
   <div class="card">
@@ -515,8 +551,25 @@ footer{text-align:center;font-size:11px;color:var(--t3);margin-top:36px;padding-
   <div style="position:relative;height:160px"><canvas id="lokasiChart"></canvas></div>
 </div>
 
+<!-- ══ FR & SR PER DEPARTEMEN ══ -->
+<div class="card card-full" style="margin-bottom:14px">
+  <div class="ct">FR &amp; SR per Departemen<span class="ct-desc">— dihitung dengan jam kerja yang sama untuk semua departemen (jam kerja total perusahaan)</span></div>
+  <div style="position:relative;height:240px"><canvas id="deptFrSrChart"></canvas></div>
+  <div style="overflow-x:auto;margin-top:16px">
+    <table class="mtbl">
+      <thead>
+        <tr><th>Departemen</th><th style="text-align:center">LTI</th><th style="text-align:center">Non-LTI</th><th style="text-align:center">Total WR</th><th style="text-align:center">HKO</th><th style="text-align:center">FR LTI</th><th style="text-align:center">SR</th></tr>
+      </thead>
+      <tbody id="dept-frsr-tbody"></tbody>
+    </table>
+  </div>
+  <div style="margin-top:8px;font-size:10.5px;color:var(--t3);font-style:italic">FR &amp; SR per departemen memakai jam kerja total perusahaan (bukan jam kerja masing-masing departemen), sehingga nilainya menunjukkan kontribusi tiap departemen terhadap FR/SR keseluruhan, bukan tingkat risiko aktual departemen tersebut.</div>
+</div>
+
+<div class="back-home-wrap"><button class="back-home-btn" onclick="scrollToTop()">⬆ Back to Home</button></div>
+
 <!-- ══ HIGHLIGHT MINGGU INI ══ -->
-<div class="sep"><span>🔔 Log Kasus Minggu Terkini</span></div>
+<div class="sep" id="section-minggu-ini"><span>🔔 Log Kasus Minggu Terkini</span></div>
 <div class="week-highlight" id="week-highlight-box">
   <div class="wh-header">
     <div>
@@ -529,7 +582,7 @@ footer{text-align:center;font-size:11px;color:var(--t3);margin-top:36px;padding-
     <table class="ctbl">
       <thead>
         <tr>
-          <th>No</th><th>Tanggal</th><th>Nama</th><th>Sub-Departemen</th>
+          <th>No</th><th>Tanggal</th><th>Nama</th><th>Departemen</th><th>Sub-Departemen</th>
           <th>Jenis Kejadian</th><th>Kronologi</th><th>Lokasi</th>
           <th>Klasifikasi</th><th style="text-align:center">HKO</th>
           <th class="act-col" id="wh-act-th" style="display:none">Aksi</th>
@@ -540,8 +593,10 @@ footer{text-align:center;font-size:11px;color:var(--t3);margin-top:36px;padding-
   </div>
 </div>
 
+<div class="back-home-wrap"><button class="back-home-btn" onclick="scrollToTop()">⬆ Back to Home</button></div>
+
 <!-- ══ LOG LENGKAP ══ -->
-<div class="sep"><span>📋 Log Lengkap Kecelakaan Kerja (Work Related) — <span id="log-period-lbl">YTD 2026</span></span></div>
+<div class="sep" id="section-log-total"><span>📋 Log Lengkap Kecelakaan Kerja (Work Related) — <span id="log-period-lbl">YTD 2026</span></span></div>
 <div class="card card-full">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
     <div class="ct" style="margin:0">Log Kasus — <span id="log-lbl2">YTD 2026</span></div>
@@ -555,6 +610,7 @@ footer{text-align:center;font-size:11px;color:var(--t3);margin-top:36px;padding-
           <th style="width:90px">Tanggal</th>
           <th style="width:56px">Minggu</th>
           <th style="min-width:120px">Nama</th>
+          <th style="min-width:100px">Departemen</th>
           <th style="min-width:130px">Sub-Departemen</th>
           <th style="min-width:100px">Jenis Kejadian</th>
           <th style="min-width:220px">Kronologi</th>
@@ -568,6 +624,8 @@ footer{text-align:center;font-size:11px;color:var(--t3);margin-top:36px;padding-
     </table>
   </div>
 </div>
+
+<div class="back-home-wrap"><button class="back-home-btn" onclick="scrollToTop()">⬆ Back to Home</button></div>
 
 <footer>Dashboard Performance Kecelakaan Kerja · Factory 2026 · Data Work Related Jan–Juni 2026 · Logika: HKO ≥ 0,5 = LTI · FR & SR dihitung otomatis</footer>
 </div>
@@ -630,7 +688,7 @@ async function fetchAllData(){
   if(!r.ok) throw new Error(j.error||'Gagal memuat data');
 
   allData = (j.kecelakaan||[]).map(d=>({
-    id: d.id, tgl: d.tgl, nama: d.nama, subdep: d.subdep,
+    id: d.id, tgl: d.tgl, nama: d.nama, departemen: d.departemen||'', subdep: d.subdep,
     jenis: d.jenis, kronologi: d.kronologi, lokasi: d.lokasi, hko: parseFloat(d.hko)||0
   }));
 
@@ -754,13 +812,14 @@ const tc='#888680';
 const PALETTE=['#2870c2','#d93535','#4e8c12','#b06d10','#8040c0','#0a8a9a','#c04080','#888680','#e07010','#207060'];
 
 // ══ CHART INSTANCES ══
-let trendInst,accInst,hkoInst,deptInst,ltiInst,jenisInst,lokasiInst;
+let trendInst,accInst,hkoInst,deptInst,ltiInst,jenisInst,lokasiInst,deptFrSrInst;
 let curTrendTab='fr_lti';
 
 // Monthly static data
 // ══ STATISTIK BULANAN (dihitung dinamis dari allData + JAM_BULAN, bukan hardcode) ══
 let months=[], frLTI=[], frTotal=[], srData=[], ltiMon=[], nonMon=[], hkoMon=[];
 const MONTH_LABELS=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+const DEPARTEMEN_LIST=['Cannery','Maintenance CN','Can Making','Concentrate','Label','Drum Plant','Power Plant','Biogas','Quality Control','QA','Lab Sentral','Factory Keeping'];
 
 function computeMonthlyStats(){
   months=[]; frLTI=[]; frTotal=[]; srData=[]; ltiMon=[]; nonMon=[]; hkoMon=[];
@@ -854,6 +913,7 @@ function updateAnalytics(){
   document.getElementById('a-sr').textContent=sr;
 
   buildDeptChart(data);
+  buildDeptFrSrChart(data);
   buildLTIChart(data);
   buildJenisChart(data);
   buildLokasiChart(data);
@@ -863,8 +923,11 @@ function updateAnalytics(){
 
 function buildDeptChart(data){
   const counts={};
-  data.forEach(d=>{counts[d.subdep]=(counts[d.subdep]||0)+1;});
-  const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  data.forEach(d=>{
+    const key=d.departemen||'(Belum diisi)';
+    counts[key]=(counts[key]||0)+1;
+  });
+  const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
   if(deptInst) deptInst.destroy();
   deptInst=new Chart(document.getElementById('deptChart'),{
     type:'bar',
@@ -886,6 +949,67 @@ function buildDeptChart(data){
       }
     }
   });
+}
+
+// ══ FR & SR PER DEPARTEMEN ══
+// Catatan: pakai jam kerja TOTAL perusahaan (sama untuk semua departemen),
+// bukan jam kerja masing-masing departemen — karena saat ini jam kerja
+// hanya tercatat per-bulan total, belum per-departemen.
+function computeDeptFrSr(data){
+  const jam = JAM_YTD; // basis YTD, sama dengan FR/SR keseluruhan di atas
+  const rows = DEPARTEMEN_LIST.map(dep=>{
+    const dDeptData = data.filter(d=>(d.departemen||'')===dep);
+    const lti = dDeptData.filter(isLTI);
+    const non = dDeptData.filter(d=>!isLTI(d));
+    const hko = dDeptData.reduce((s,d)=>s+(parseFloat(d.hko)||0),0);
+    const fr = jam>0 ? Math.round((lti.length/jam*1e6)*100)/100 : 0;
+    const sr = jam>0 ? Math.round((hko/jam*1e6)*100)/100 : 0;
+    return { dep, lti: lti.length, non: non.length, total: lti.length+non.length, hko: Math.round(hko*10)/10, fr, sr };
+  });
+  // Sertakan juga kasus yang departemen-nya belum diisi (data lama), kalau ada
+  const belumDiisi = data.filter(d=>!d.departemen);
+  if(belumDiisi.length){
+    const lti=belumDiisi.filter(isLTI), non=belumDiisi.filter(d=>!isLTI(d));
+    const hko=belumDiisi.reduce((s,d)=>s+(parseFloat(d.hko)||0),0);
+    const fr=jam>0?Math.round((lti.length/jam*1e6)*100)/100:0;
+    const sr=jam>0?Math.round((hko/jam*1e6)*100)/100:0;
+    rows.push({dep:'(Belum diisi)', lti:lti.length, non:non.length, total:lti.length+non.length, hko:Math.round(hko*10)/10, fr, sr});
+  }
+  return rows.sort((a,b)=>b.total-a.total);
+}
+
+function buildDeptFrSrChart(data){
+  const rows = computeDeptFrSr(data).filter(r=>r.total>0); // sembunyikan departemen yang belum ada kasusnya, supaya grafik tidak penuh baris kosong
+  if(deptFrSrInst) deptFrSrInst.destroy();
+
+  if(rows.length===0){
+    document.getElementById('dept-frsr-tbody').innerHTML='<tr><td colspan="7"><div class="empty-st">Belum ada data departemen untuk periode ini.</div></td></tr>';
+    return;
+  }
+
+  deptFrSrInst=new Chart(document.getElementById('deptFrSrChart'),{
+    type:'bar',
+    data:{labels:rows.map(r=>r.dep),datasets:[
+      {label:'FR LTI',data:rows.map(r=>r.fr),backgroundColor:'#2870c2cc',borderRadius:3},
+      {label:'SR',data:rows.map(r=>r.sr),backgroundColor:'#4e8c12cc',borderRadius:3}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'top',labels:{font:{size:10},color:tc,boxWidth:10,padding:8}},
+               datalabels:{display:false}},
+      scales:{x:{grid:{display:false},ticks:{color:tc,font:{size:10},autoSkip:false,maxRotation:0,minRotation:0}},
+              y:{grid:{color:gc},ticks:{color:tc,font:{size:10}}}}}
+  });
+
+  const tbody=document.getElementById('dept-frsr-tbody');
+  tbody.innerHTML=rows.map(r=>`<tr>
+    <td>${esc(r.dep)}</td>
+    <td style="text-align:center">${r.lti>0?'<strong style="color:var(--red)">'+r.lti+'</strong>':r.lti}</td>
+    <td style="text-align:center">${r.non}</td>
+    <td style="text-align:center"><strong>${r.total}</strong></td>
+    <td style="text-align:center">${r.hko}</td>
+    <td style="text-align:center" class="${r.fr>6.20?'danger':'ok'}">${r.fr.toFixed(2)}</td>
+    <td style="text-align:center" class="${r.sr>40?'danger':'ok'}">${r.sr.toFixed(2)}</td>
+  </tr>`).join('');
 }
 
 function buildLTIChart(data){
@@ -1002,7 +1126,7 @@ function buildWeekHighlight(){
 
   const tbody=document.getElementById('wh-tbody');
   if(wdata.length===0){
-    tbody.innerHTML='<tr><td colspan="'+(isAdmin?10:9)+'"><div class="wh-empty">Tidak ada kasus pada minggu ini.</div></td></tr>';
+    tbody.innerHTML='<tr><td colspan="'+(isAdmin?11:10)+'"><div class="wh-empty">Tidak ada kasus pada minggu ini.</div></td></tr>';
     return;
   }
   tbody.innerHTML=wdata.map((d,i)=>{
@@ -1017,6 +1141,7 @@ function buildWeekHighlight(){
       <td style="color:var(--t3);font-size:10px">${i+1}</td>
       <td style="white-space:nowrap">${tgl}</td>
       <td><strong>${esc(d.nama)}</strong></td>
+      <td style="font-size:11px">${esc(d.departemen||'—')}</td>
       <td>${esc(d.subdep)}</td>
       <td><span style="font-size:11px">${esc(d.jenis||'—')}</span></td>
       <td style="font-size:11px;color:var(--t2)">${esc(d.kronologi)}</td>
@@ -1036,7 +1161,7 @@ function buildCaseTable(data){
   document.getElementById('log-act-th').style.display = isAdmin?'':'none';
 
   if(sorted.length===0){
-    tbody.innerHTML='<tr><td colspan="'+(isAdmin?11:10)+'"><div class="empty-st">Tidak ada kasus untuk periode ini.</div></td></tr>';
+    tbody.innerHTML='<tr><td colspan="'+(isAdmin?12:11)+'"><div class="empty-st">Tidak ada kasus untuk periode ini.</div></td></tr>';
     return;
   }
   tbody.innerHTML=sorted.map((d,i)=>{
@@ -1052,6 +1177,7 @@ function buildCaseTable(data){
       <td style="white-space:nowrap;font-size:11px">${tgl}</td>
       <td style="font-size:11px;color:var(--t2)">${weekLabel(d.tgl)}</td>
       <td><strong style="font-weight:600">${esc(d.nama)}</strong></td>
+      <td style="font-size:11px">${esc(d.departemen||'—')}</td>
       <td style="font-size:11px">${esc(d.subdep)}</td>
       <td style="font-size:11px"><span style="background:var(--sf2);padding:1px 6px;border-radius:4px">${esc(d.jenis||'—')}</span></td>
       <td style="font-size:11px;color:var(--t2)">${esc(d.kronologi)}</td>
@@ -1093,6 +1219,15 @@ function closeModal(id){
   document.getElementById(id).classList.remove('show');
 }
 
+// ══ NAVIGASI CEPAT ══
+function scrollToSection(id){
+  const el=document.getElementById(id);
+  if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function scrollToTop(){
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
 // ══ CRUD: KASUS ══
 function openKasusModal(id){
   document.getElementById('kasus-err').textContent='';
@@ -1105,6 +1240,7 @@ function openKasusModal(id){
     document.getElementById('kasus-tgl').value=d.tgl;
     document.getElementById('kasus-hko').value=d.hko;
     document.getElementById('kasus-nama').value=d.nama;
+    document.getElementById('kasus-departemen').value=d.departemen||'';
     document.getElementById('kasus-subdep').value=d.subdep||'';
     document.getElementById('kasus-jenis').value=d.jenis||'Lain-lain';
     document.getElementById('kasus-lokasi').value=d.lokasi||'';
@@ -1114,6 +1250,7 @@ function openKasusModal(id){
     document.getElementById('kasus-tgl').value='';
     document.getElementById('kasus-hko').value='';
     document.getElementById('kasus-nama').value='';
+    document.getElementById('kasus-departemen').value='';
     document.getElementById('kasus-subdep').value='';
     document.getElementById('kasus-jenis').value='Lain-lain';
     document.getElementById('kasus-lokasi').value='';
@@ -1131,6 +1268,7 @@ async function submitKasus(){
   const payload={
     tgl: document.getElementById('kasus-tgl').value,
     nama: document.getElementById('kasus-nama').value.trim(),
+    departemen: document.getElementById('kasus-departemen').value,
     subdep: document.getElementById('kasus-subdep').value.trim(),
     jenis: document.getElementById('kasus-jenis').value,
     lokasi: document.getElementById('kasus-lokasi').value.trim(),
@@ -1140,6 +1278,7 @@ async function submitKasus(){
 
   if(!payload.tgl){ errEl.textContent='Tanggal wajib diisi.'; return; }
   if(!payload.nama){ errEl.textContent='Nama wajib diisi.'; return; }
+  if(!payload.departemen){ errEl.textContent='Departemen wajib dipilih.'; return; }
   if(payload.hko===''||isNaN(parseFloat(payload.hko))){ errEl.textContent='HKO wajib diisi (boleh 0).'; return; }
 
   btn.disabled=true; btn.textContent='Menyimpan...';
