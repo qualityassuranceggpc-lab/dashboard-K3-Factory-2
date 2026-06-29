@@ -1,0 +1,17 @@
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+# Supaya semua request ke /api/* diarahkan ke Netlify Functions dengan nama lebih pendek/rapi
+[[redirects]]
+  from = "/api/verify-pin"
+  to = "/.netlify/functions/verify-pin"
+  status = 200
+
+[[redirects]]
+  from = "/api/data"
+  to = "/.netlify/functions/data"
+  status = 200
