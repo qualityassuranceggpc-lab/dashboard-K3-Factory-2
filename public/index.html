@@ -8,12 +8,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <style>
 :root{
-  --bg:#f5f4f1;--surface:#fff;--sf2:#f1efe8;--sf3:#e8e6df;
-  --bdr:rgba(0,0,0,0.10);--text:#18180f;--t2:#5a5956;--t3:#888680;
-  --blue:#2870c2;--blue-bg:#deeaf8;--blue-t:#0b3d7a;
-  --green:#4e8c12;--green-bg:#dff0cc;--green-t:#2d5a05;
-  --red:#d93535;--red-bg:#fce8e8;--red-t:#8c1a1a;
-  --amber:#b06d10;--amber-bg:#fdf0d8;--amber-t:#7a4300;
+  --bg:#f7f8fa;--surface:#fff;--sf2:#f1f3f5;--sf3:#e7e9ec;
+  --bdr:rgba(15,23,42,0.10);--text:#1a202c;--t2:#5b6472;--t3:#8a93a0;
+  --blue:#2563eb;--blue-bg:#e3edfd;--blue-t:#1742a0;
+  --green:#16a34a;--green-bg:#dcf5e6;--green-t:#0f6e34;
+  --red:#dc2626;--red-bg:#fde6e6;--red-t:#9b1c1c;
+  --amber:#b45309;--amber-bg:#fdf0d8;--amber-t:#7c3d05;
   --r:10px;--rs:6px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -205,6 +205,10 @@ footer{text-align:center;font-size:11px;color:var(--t3);margin-top:36px;padding-
 .back-home-wrap{display:flex;justify-content:center;margin:18px 0}
 .back-home-btn{font-size:12px;font-weight:600;padding:8px 18px;border-radius:20px;border:.5px solid var(--bdr);background:var(--sf2);color:var(--t2);cursor:pointer;transition:.15s}
 .back-home-btn:hover{background:var(--surface);border-color:var(--blue);color:var(--blue-t)}
+
+/* ── LOG SEARCH ── */
+.log-search-input{width:100%;padding:10px 14px;border-radius:var(--rs);border:1px solid var(--bdr);background:var(--sf2);color:var(--text);font-size:13px;font-family:inherit}
+.log-search-input:focus{outline:2px solid var(--blue);outline-offset:1px}
 </style>
 </head>
 <body>
@@ -270,16 +274,10 @@ footer{text-align:center;font-size:11px;color:var(--t3);margin-top:36px;padding-
     </div>
     <div class="form-row">
       <label>Jenis Kejadian</label>
-      <select id="kasus-jenis">
-        <option>Terpeleset/Terjatuh</option>
-        <option>Tertimpa Benda</option>
-        <option>Terjepit</option>
-        <option>Tersayat</option>
-        <option>Tergores</option>
-        <option>Tertusuk</option>
-        <option>Paparan Kimia/Soda</option>
-        <option>Lain-lain</option>
-      </select>
+      <div style="display:flex;gap:8px;align-items:flex-start">
+        <select id="kasus-jenis" style="flex:1"></select>
+        <button type="button" class="btn-mini btn-mini-edit" id="btn-add-jenis" style="display:none;white-space:nowrap;padding:9px 12px" onclick="openAddJenisPrompt()">+ Baru</button>
+      </div>
     </div>
     <div class="form-row">
       <label>Lokasi Kejadian</label>
@@ -364,6 +362,7 @@ footer{text-align:center;font-size:11px;color:var(--t3);margin-top:36px;padding-
 <!-- ══ NAVIGASI CEPAT ══ -->
 <div class="quicknav">
   <button class="quicknav-btn" onclick="scrollToSection('section-analitik')">📊 Analitik Kecelakaan Kerja</button>
+  <button class="quicknav-btn" onclick="scrollToSection('section-fr-sr-bulanan')">📈 FR-SR Bulanan</button>
   <button class="quicknav-btn" onclick="scrollToSection('section-minggu-ini')">🔔 Log Kasus Minggu Ini</button>
   <button class="quicknav-btn" onclick="scrollToSection('section-log-total')">📋 Log Total</button>
 </div>
@@ -444,7 +443,7 @@ footer{text-align:center;font-size:11px;color:var(--t3);margin-top:36px;padding-
 </div>
 
 <!-- ══ TREND CHART ══ -->
-<div class="card card-full">
+<div class="card card-full" id="section-fr-sr-bulanan">
   <div class="ct">Trend Bulanan FR (Frequency Rate) &amp; SR (Severity Rate) — Jan s/d Jun 2026</div>
   <div class="tabs">
     <button class="tab active" onclick="switchTab('fr_lti',this)">FR — LTI Saja<br><span style="font-size:9px;font-weight:400">Lost Time Injury (Hari Kerja Hilang ≥ 0,5)</span></button>
@@ -533,7 +532,7 @@ footer{text-align:center;font-size:11px;color:var(--t3);margin-top:36px;padding-
 <!-- ANA CHARTS: 3 kolom -->
 <div class="r3">
   <div class="card">
-    <div class="ct">Per Departemen</div>
+    <div class="ct">Grafik Jumlah Kecelakaan Kerja Total per Departemen</div>
     <div style="position:relative;height:210px"><canvas id="deptChart"></canvas></div>
   </div>
   <div class="card">
@@ -547,7 +546,7 @@ footer{text-align:center;font-size:11px;color:var(--t3);margin-top:36px;padding-
 </div>
 
 <div class="card card-full" style="margin-bottom:14px">
-  <div class="ct">Per Lokasi Kejadian</div>
+  <div class="ct">Per Lokasi Kejadian<span class="ct-desc">— dikelompokkan otomatis berdasarkan kata kunci & nomor (mis. "Area Line 16" dan "Produksi Line 16" dihitung sebagai "Line 16")</span></div>
   <div style="position:relative;height:160px"><canvas id="lokasiChart"></canvas></div>
 </div>
 
@@ -601,6 +600,9 @@ footer{text-align:center;font-size:11px;color:var(--t3);margin-top:36px;padding-
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
     <div class="ct" style="margin:0">Log Kasus — <span id="log-lbl2">YTD 2026</span></div>
     <span style="font-size:11px;color:var(--t2)" id="log-count">Menampilkan — kasus</span>
+  </div>
+  <div style="margin-bottom:12px">
+    <input type="text" id="log-search" class="log-search-input" placeholder="🔍 Cari nama, departemen, kronologi, lokasi, jenis kejadian..." oninput="onLogSearch()">
   </div>
   <div class="ctbl-wrap">
     <table class="ctbl">
@@ -680,6 +682,7 @@ let JAM_BULAN = {};
 let JAM_YTD = 0;
 let JAM_ROWS = [];
 let PIN_VIEWER_SET_AT = null;
+let JENIS_KEJADIAN_LIST = []; // diisi dari Supabase, bisa ditambah Admin lewat dashboard
 
 async function fetchAllData(){
   const r = await fetch(API_BASE, { headers: authHeaders() });
@@ -697,6 +700,40 @@ async function fetchAllData(){
   JAM_ROWS.forEach(row=>{ JAM_BULAN[row.bulan] = parseFloat(row.jam_kerja)||0; });
   JAM_YTD = JAM_ROWS.reduce((s,row)=>s+(parseFloat(row.jam_kerja)||0), 0);
   PIN_VIEWER_SET_AT = j.pinViewerSetAt || null;
+
+  JENIS_KEJADIAN_LIST = (j.jenisKejadian||[]).map(r=>r.nama);
+  if(JENIS_KEJADIAN_LIST.length===0){
+    // fallback kalau tabel belum di-migrasi/kosong, supaya form tetap bisa dipakai
+    JENIS_KEJADIAN_LIST = ['Terpeleset/Terjatuh','Tertimpa Benda','Terjepit','Tersayat','Tergores','Tertusuk','Paparan Kimia/Soda','Terkena Gram Gerinda/Las','Lain-lain'];
+  }
+  renderJenisDropdown();
+}
+
+function renderJenisDropdown(){
+  const sel=document.getElementById('kasus-jenis');
+  const current=sel.value;
+  sel.innerHTML=JENIS_KEJADIAN_LIST.map(j=>'<option>'+esc(j)+'</option>').join('');
+  if(JENIS_KEJADIAN_LIST.includes(current)) sel.value=current;
+}
+
+function openAddJenisPrompt(){
+  const nama=prompt('Nama jenis kejadian baru:');
+  if(!nama || !nama.trim()) return;
+  addJenisKejadian(nama.trim());
+}
+
+async function addJenisKejadian(nama){
+  try{
+    const r=await fetch(API_BASE,{method:'POST',headers:authHeaders(),body:JSON.stringify({type:'jenis_kejadian',nama})});
+    const j=await r.json();
+    if(!r.ok) throw new Error(j.error||'Gagal menambah jenis kejadian');
+    JENIS_KEJADIAN_LIST.push(nama);
+    renderJenisDropdown();
+    document.getElementById('kasus-jenis').value=nama;
+    showToast('Jenis kejadian "'+nama+'" berhasil ditambahkan');
+  }catch(e){
+    showToast(e.message,true);
+  }
 }
 
 async function bootApp(){
@@ -710,6 +747,7 @@ async function bootApp(){
     document.getElementById('btn-add-kasus').style.display = 'flex';
     document.getElementById('btn-jam-kerja').style.display = 'inline-block';
     document.getElementById('btn-rotate-pin').style.display = 'inline-block';
+    document.getElementById('btn-add-jenis').style.display = 'inline-block';
   }else{
     roleBadge.textContent = '👁️ Mode Viewer';
     roleBadge.className = 'role-badge role-viewer';
@@ -809,7 +847,7 @@ function setFilter(f,btn){
 const isDark=window.matchMedia('(prefers-color-scheme:dark)').matches;
 const gc=isDark?'rgba(255,255,255,0.07)':'rgba(0,0,0,0.07)';
 const tc='#888680';
-const PALETTE=['#2870c2','#d93535','#4e8c12','#b06d10','#8040c0','#0a8a9a','#c04080','#888680','#e07010','#207060'];
+const PALETTE=['#2563eb','#dc2626','#16a34a','#b45309','#7c3aed','#0891b2','#db2777','#64748b','#ea580c','#0d9488'];
 
 // ══ CHART INSTANCES ══
 let trendInst,accInst,hkoInst,deptInst,ltiInst,jenisInst,lokasiInst,deptFrSrInst;
@@ -858,11 +896,11 @@ function switchTab(type,btn){
   const ctx=document.getElementById('trendChart').getContext('2d');
   let vals,target,color,yMax,lbl,targetVal;
   if(type==='fr_lti'){
-    vals=frLTI; targetVal=6.20; color='#2870c2'; lbl='FR LTI';
+    vals=frLTI; targetVal=6.20; color='#2563eb'; lbl='FR LTI';
   } else if(type==='fr_total'){
-    vals=frTotal; targetVal=6.20; color='#8040c0'; lbl='FR Total';
+    vals=frTotal; targetVal=6.20; color='#7c3aed'; lbl='FR Total';
   } else {
-    vals=srData; targetVal=40; color='#4e8c12'; lbl='SR';
+    vals=srData; targetVal=40; color='#16a34a'; lbl='SR';
   }
   target=months.map(()=>targetVal);
   const maxVal=Math.max(targetVal,...vals,1);
@@ -876,7 +914,7 @@ function switchTab(type,btn){
        tension:.35,pointRadius:6,pointBackgroundColor:color,borderWidth:2.5,
        datalabels:{display:true,align:'top',anchor:'top',color:color,
                    font:{size:12,weight:'bold'},formatter:v=>v===0?'0':v.toFixed(2)}},
-      {label:'Target',data:target,borderColor:'#d93535',borderDash:[7,4],
+      {label:'Target',data:target,borderColor:'#dc2626',borderDash:[7,4],
        borderWidth:1.5,pointRadius:0,fill:false,datalabels:{display:false}}
     ]},
     options:{responsive:true,maintainAspectRatio:false,
@@ -904,7 +942,6 @@ function updateAnalytics(){
   document.getElementById('f-info').textContent='→ '+data.length+' kasus ditampilkan';
   document.getElementById('log-period-lbl').textContent=periodLbl;
   document.getElementById('log-lbl2').textContent=periodLbl;
-  document.getElementById('log-count').textContent='Menampilkan '+data.length+' kasus';
 
   document.getElementById('a-total').textContent=data.length;
   document.getElementById('a-lti-sub').textContent='LTI: '+ltiArr.length+' | Non-LTI: '+nonArr.length;
@@ -990,12 +1027,17 @@ function buildDeptFrSrChart(data){
   deptFrSrInst=new Chart(document.getElementById('deptFrSrChart'),{
     type:'bar',
     data:{labels:rows.map(r=>r.dep),datasets:[
-      {label:'FR LTI',data:rows.map(r=>r.fr),backgroundColor:'#2870c2cc',borderRadius:3},
-      {label:'SR',data:rows.map(r=>r.sr),backgroundColor:'#4e8c12cc',borderRadius:3}
+      {label:'FR LTI',data:rows.map(r=>r.fr),backgroundColor:'#2563ebcc',borderRadius:3},
+      {label:'SR',data:rows.map(r=>r.sr),backgroundColor:'#16a34acc',borderRadius:3}
     ]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:true,position:'top',labels:{font:{size:10},color:tc,boxWidth:10,padding:8}},
-               datalabels:{display:false}},
+               datalabels:{
+                 display:true,anchor:'end',align:'top',offset:2,
+                 color:tc,font:{size:9,weight:'bold'},
+                 formatter:v=>v>0?v.toFixed(2):''
+               }},
+      layout:{padding:{top:18}},
       scales:{x:{grid:{display:false},ticks:{color:tc,font:{size:10},autoSkip:false,maxRotation:0,minRotation:0}},
               y:{grid:{color:gc},ticks:{color:tc,font:{size:10}}}}}
   });
@@ -1020,7 +1062,7 @@ function buildLTIChart(data){
     type:'doughnut',
     data:{
       labels:['LTI — Hari Kerja Hilang','Non-LTI — Tanpa Hari Kerja Hilang'],
-      datasets:[{data:[ltiC,nonC],backgroundColor:['#d93535cc','#4e8c12cc'],
+      datasets:[{data:[ltiC,nonC],backgroundColor:['#dc2626cc','#16a34acc'],
                  borderWidth:0,hoverOffset:5}]
     },
     options:{responsive:true,maintainAspectRatio:false,cutout:'58%',
@@ -1063,12 +1105,41 @@ function buildJenisChart(data){
   });
 }
 
+// ══ PENGELOMPOKAN LOKASI OTOMATIS ══
+// Mencari pola "kata kunci + nomor" (mis. "Line 16", "Ginaca 08", "ESP #03")
+// di teks lokasi, lalu mengelompokkan semua lokasi dengan pola sama jadi
+// satu grup. Kata di sekitarnya (Area, Produksi, di, dekat, dst) diabaikan.
+// Kalau ada kata tambahan SETELAH nomor (mis. "Line 8 Labelling"), itu jadi
+// grup tersendiri, terpisah dari "Line 8" biasa. Kalau tidak ada pola
+// kata+nomor sama sekali, teks lokasi apa adanya jadi nama grupnya sendiri.
+const LOKASI_FILLER_WORDS=['di','dekat','area','depan','belakang','samping','sebelah','dan','atau','pada','saat',''];
+function extractLocationGroup(lokasi){
+  if(!lokasi || !lokasi.trim()) return '(Tidak diisi)';
+  const text=lokasi.trim();
+  const match=text.match(/([A-Za-z]+)\s*#?\s*(\d+)/);
+  if(match){
+    let kataKunci=match[1];
+    const nomor=match[2];
+    const isAbbrev=kataKunci.length<=5 && kataKunci===kataKunci.toUpperCase();
+    kataKunci=isAbbrev ? kataKunci.toUpperCase() : kataKunci.charAt(0).toUpperCase()+kataKunci.slice(1).toLowerCase();
+
+    const afterIdx=match.index+match[0].length;
+    const afterText=text.slice(afterIdx).trim();
+    const extraWord=(afterText.split(/\s+/)[0]||'').replace(/[^A-Za-z]/g,'');
+    if(extraWord && !LOKASI_FILLER_WORDS.includes(extraWord.toLowerCase())){
+      return kataKunci+' '+nomor+' '+extraWord.charAt(0).toUpperCase()+extraWord.slice(1).toLowerCase();
+    }
+    return kataKunci+' '+nomor;
+  }
+  return text;
+}
+
 function buildLokasiChart(data){
   const counts={};
   data.forEach(d=>{
-    let l=d.lokasi||'Tidak diketahui';
-    if(l.length>30) l=l.substring(0,29)+'…';
-    counts[l]=(counts[l]||0)+1;
+    const grp=extractLocationGroup(d.lokasi);
+    const label=grp.length>30?grp.substring(0,29)+'…':grp;
+    counts[label]=(counts[label]||0)+1;
   });
   const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,8);
   if(lokasiInst) lokasiInst.destroy();
@@ -1076,7 +1147,7 @@ function buildLokasiChart(data){
     type:'bar',
     data:{labels:sorted.map(e=>e[0]),datasets:[{
       data:sorted.map(e=>e[1]),
-      backgroundColor:'#b06d10cc',
+      backgroundColor:'#b45309cc',
       borderRadius:4
     }]},
     options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
@@ -1154,14 +1225,36 @@ function buildWeekHighlight(){
 }
 
 // ══ CASE TABLE ══
+let LOG_TABLE_RAW_DATA=[]; // data sebelum difilter search, untuk re-render saat ketik di search box
+let LOG_SEARCH_QUERY='';
+
+function onLogSearch(){
+  LOG_SEARCH_QUERY=document.getElementById('log-search').value.trim().toLowerCase();
+  renderCaseTableBody();
+}
+
 function buildCaseTable(data){
+  LOG_TABLE_RAW_DATA=data;
+  renderCaseTableBody();
+}
+
+function renderCaseTableBody(){
+  let data=LOG_TABLE_RAW_DATA;
+  if(LOG_SEARCH_QUERY){
+    data=data.filter(d=>{
+      const haystack=[d.nama,d.departemen,d.subdep,d.jenis,d.kronologi,d.lokasi].join(' ').toLowerCase();
+      return haystack.includes(LOG_SEARCH_QUERY);
+    });
+  }
   const sorted=[...data].sort((a,b)=>new Date(b.tgl)-new Date(a.tgl));
   const tbody=document.getElementById('case-tbody');
   const isAdmin = AUTH_ROLE==='admin';
   document.getElementById('log-act-th').style.display = isAdmin?'':'none';
+  document.getElementById('log-count').textContent='Menampilkan '+sorted.length+(LOG_SEARCH_QUERY?' dari '+LOG_TABLE_RAW_DATA.length:'')+' kasus';
 
   if(sorted.length===0){
-    tbody.innerHTML='<tr><td colspan="'+(isAdmin?12:11)+'"><div class="empty-st">Tidak ada kasus untuk periode ini.</div></td></tr>';
+    const msg=LOG_SEARCH_QUERY?'Tidak ada kasus yang cocok dengan pencarian "'+esc(LOG_SEARCH_QUERY)+'".':'Tidak ada kasus untuk periode ini.';
+    tbody.innerHTML='<tr><td colspan="'+(isAdmin?12:11)+'"><div class="empty-st">'+msg+'</div></td></tr>';
     return;
   }
   tbody.innerHTML=sorted.map((d,i)=>{
@@ -1524,8 +1617,8 @@ function buildMonthlyCharts(){
   accInst=new Chart(document.getElementById('accChart'),{
     type:'bar',
     data:{labels:months,datasets:[
-      {label:'LTI (Hari Kerja Hilang)',data:ltiMon,backgroundColor:'#d93535cc',borderRadius:3},
-      {label:'Non-LTI (Tanpa Hari Kerja Hilang)',data:nonMon,backgroundColor:'#4e8c12cc',borderRadius:3}
+      {label:'LTI (Hari Kerja Hilang)',data:ltiMon,backgroundColor:'#dc2626cc',borderRadius:3},
+      {label:'Non-LTI (Tanpa Hari Kerja Hilang)',data:nonMon,backgroundColor:'#16a34acc',borderRadius:3}
     ]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:true,position:'top',labels:{font:{size:10},color:tc,boxWidth:10,padding:8}},
@@ -1537,7 +1630,7 @@ function buildMonthlyCharts(){
   hkoInst=new Chart(document.getElementById('hkoChart'),{
     type:'bar',
     data:{labels:months,datasets:[{label:'HKO Hilang (hari)',data:hkoMon,
-      backgroundColor:'#d9353588',borderColor:'#d93535',borderWidth:1.5,borderRadius:3}]},
+      backgroundColor:'#dc262688',borderColor:'#dc2626',borderWidth:1.5,borderRadius:3}]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false},datalabels:{display:false},
                tooltip:{callbacks:{label:c=>c.parsed.y+' hari kerja hilang'}}},
