@@ -70,15 +70,17 @@ exports.handler = async function (event) {
   try {
     // ══ GET — ambil semua data ══
     if (method === 'GET') {
-      const [kecelakaanRes, jamRes] = await Promise.all([
+      const [kecelakaanRes, jamRes, jenisRes] = await Promise.all([
         fetch(`${SUPABASE_URL}/rest/v1/kecelakaan?select=*&order=tgl.asc`, { headers: sbHeaders() }),
         fetch(`${SUPABASE_URL}/rest/v1/jam_kerja_bulanan?select=*&order=tahun.asc,bulan.asc`, { headers: sbHeaders() }),
+        fetch(`${SUPABASE_URL}/rest/v1/jenis_kejadian?select=*&order=urutan.asc`, { headers: sbHeaders() }),
       ]);
       if (!kecelakaanRes.ok) return json(502, { error: 'Gagal mengambil data kecelakaan dari Supabase' });
       if (!jamRes.ok) return json(502, { error: 'Gagal mengambil data jam kerja dari Supabase' });
 
       const kecelakaan = await kecelakaanRes.json();
       const jamKerja = await jamRes.json();
+      const jenisKejadian = jenisRes.ok ? await jenisRes.json() : [];
 
       let pinViewerSetAt = null;
       if (auth.role === 'admin') {
@@ -89,7 +91,7 @@ exports.handler = async function (event) {
         }
       }
 
-      return json(200, { kecelakaan, jamKerja, role: auth.role, pinViewerSetAt });
+      return json(200, { kecelakaan, jamKerja, jenisKejadian, role: auth.role, pinViewerSetAt });
     }
 
     const body = JSON.parse(event.body || '{}');
@@ -126,6 +128,24 @@ exports.handler = async function (event) {
           }),
         });
         if (!r.ok) return json(502, { error: 'Gagal menyimpan jam kerja: ' + (await r.text()) });
+        return json(201, await r.json());
+      }
+
+      if (body.type === 'jenis_kejadian') {
+        const nama = (body.nama || '').trim();
+        if (!nama) return json(400, { error: 'Nama jenis kejadian wajib diisi' });
+        const r = await fetch(`${SUPABASE_URL}/rest/v1/jenis_kejadian`, {
+          method: 'POST',
+          headers: { ...sbHeaders(), Prefer: 'return=representation' },
+          body: JSON.stringify({ nama, urutan: body.urutan || 999 }),
+        });
+        if (!r.ok) {
+          const errText = await r.text();
+          if (errText.includes('duplicate') || errText.includes('unique')) {
+            return json(400, { error: 'Jenis kejadian "' + nama + '" sudah ada di daftar' });
+          }
+          return json(502, { error: 'Gagal menyimpan jenis kejadian: ' + errText });
+        }
         return json(201, await r.json());
       }
 
