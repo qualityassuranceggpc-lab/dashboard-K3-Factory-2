@@ -224,7 +224,7 @@ function validateKasus(body) {
 }
 
 function pickKasusFields(body) {
-  return {
+  const fields = {
     tgl: body.tgl,
     nama: (body.nama || '').trim(),
     departemen: body.departemen || '',
@@ -234,4 +234,15 @@ function pickKasusFields(body) {
     lokasi: body.lokasi || '',
     hko: parseFloat(body.hko) || 0,
   };
+  // follow_up hanya ikut di-update kalau memang ada di body (bisa update kasus tanpa reset follow_up)
+  if (body.follow_up !== undefined) {
+    const fu = body.follow_up || {};
+    fields.follow_up = {
+      status:            fu.status            || 'belum',
+      root_cause:        fu.root_cause        || '',
+      corrective_action: fu.corrective_action || '',
+      deadline:          fu.deadline          || '',
+    };
+  }
+  return fields;
 }
