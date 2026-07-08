@@ -15,3 +15,8 @@
   from = "/api/data"
   to = "/.netlify/functions/data"
   status = 200
+
+[[redirects]]
+  from = "/api/dokumen"
+  to = "/.netlify/functions/dokumen"
+  status = 200
