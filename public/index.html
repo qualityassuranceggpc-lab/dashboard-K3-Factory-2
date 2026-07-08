@@ -209,6 +209,40 @@ footer{text-align:center;font-size:11px;color:var(--t3);margin-top:36px;padding-
 /* ── LOG SEARCH ── */
 .log-search-input{width:100%;padding:10px 14px;border-radius:var(--rs);border:1px solid var(--bdr);background:var(--sf2);color:var(--text);font-size:13px;font-family:inherit}
 .log-search-input:focus{outline:2px solid var(--blue);outline-offset:1px}
+
+/* ── DOKUMEN UPLOAD ── */
+.dok-section{margin-top:14px;padding-top:14px;border-top:.5px solid var(--bdr)}
+.dok-section-title{font-size:11.5px;font-weight:700;color:var(--t2);margin-bottom:10px}
+.dok-list{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.dok-item{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--sf2);border-radius:var(--rs);font-size:11.5px}
+.dok-item-name{flex:1;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dok-empty{font-size:11px;color:var(--t3);font-style:italic;margin-bottom:8px}
+.dok-upload-area{display:flex;gap:8px;align-items:center}
+.dok-file-input{display:none}
+.dok-upload-label{padding:7px 14px;border-radius:var(--rs);border:1.5px dashed var(--bdr);background:var(--sf2);color:var(--t2);font-size:11.5px;cursor:pointer;flex:1;text-align:center}
+.dok-upload-label:hover{border-color:var(--blue);color:var(--blue-t)}
+.dok-hint{font-size:10.5px;color:var(--t3);margin-top:5px}
+.dok-progress{font-size:11px;color:var(--blue-t);font-style:italic;min-height:14px}
+
+/* ── FOLLOW UP ── */
+.fu-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:10.5px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;transition:.15s}
+.fu-pill:hover{opacity:.85}
+.fu-belum  {background:#f1f5f9;color:#64748b}
+.fu-proses {background:#fef3c7;color:#92400e}
+.fu-selesai{background:var(--green-bg);color:var(--green-t)}
+.fu-tidak  {background:var(--red-bg);color:var(--red-t)}
+
+/* Popup detail follow up */
+.fu-popup-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:950;padding:16px}
+.fu-popup-overlay.show{display:flex}
+.fu-popup{background:var(--surface);border-radius:12px;padding:20px 22px;max-width:460px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,.2)}
+.fu-popup-title{font-size:14px;font-weight:800;margin-bottom:4px}
+.fu-popup-sub{font-size:11px;color:var(--t3);margin-bottom:14px}
+.fu-popup-field{margin-bottom:12px}
+.fu-popup-field label{display:block;font-size:10.5px;font-weight:700;color:var(--t2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}
+.fu-popup-field .fu-val{font-size:12.5px;color:var(--text);line-height:1.5;white-space:pre-wrap}
+.fu-popup-field .fu-empty{font-size:12px;color:var(--t3);font-style:italic}
+.fu-popup-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px;padding-top:12px;border-top:.5px solid var(--bdr)}
 </style>
 </head>
 <body>
@@ -292,6 +326,54 @@ footer{text-align:center;font-size:11px;color:var(--t3);margin-top:36px;padding-
       <button class="btn" onclick="closeModal('modal-kasus')">Batal</button>
       <button class="btn btn-p" id="kasus-save-btn" onclick="submitKasus()">Simpan</button>
     </div>
+
+    <!-- Section dokumen — hanya tampil saat mode EDIT (ada id kasus) -->
+    <div class="dok-section" id="dok-section" style="display:none">
+      <div class="dok-section-title">📎 Dokumen Terlampir</div>
+      <div class="dok-list" id="dok-list"></div>
+      <div class="dok-upload-area">
+        <label class="dok-upload-label" for="dok-file-input">
+          📁 Pilih file untuk diupload (PDF / Foto)
+        </label>
+        <input type="file" id="dok-file-input" class="dok-file-input"
+          accept=".pdf,.jpg,.jpeg,.png,.webp"
+          onchange="handleDokumenUpload(this)">
+      </div>
+      <div class="dok-hint">Maks. 10MB per file. Format: PDF, JPG, PNG, WEBP.</div>
+      <div class="dok-progress" id="dok-progress"></div>
+    </div>
+
+    <!-- Section Follow Up — hanya tampil saat mode EDIT -->
+    <div class="dok-section" id="fu-section" style="display:none">
+      <div class="dok-section-title">🔍 Follow Up Kasus</div>
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label>Status Follow Up</label>
+          <select id="fu-status">
+            <option value="belum">⏳ Belum</option>
+            <option value="proses">🔄 Proses</option>
+            <option value="selesai">✅ Selesai</option>
+            <option value="tidak">❌ Tidak Ditindaklanjuti</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Target Selesai (Deadline)</label>
+          <input type="date" id="fu-deadline">
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Root Cause (Akar Penyebab)</label>
+        <textarea id="fu-root-cause" placeholder="Tuliskan akar penyebab kecelakaan..." style="min-height:64px"></textarea>
+      </div>
+      <div class="form-row">
+        <label>Corrective Action (Tindakan Perbaikan)</label>
+        <textarea id="fu-corrective-action" placeholder="Tuliskan tindakan perbaikan yang dilakukan..." style="min-height:64px"></textarea>
+      </div>
+      <div class="form-err" id="fu-err"></div>
+      <div class="form-actions" style="justify-content:flex-start;margin-top:10px">
+        <button class="btn btn-p" onclick="submitFollowUp()">💾 Simpan Follow Up</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -330,6 +412,34 @@ footer{text-align:center;font-size:11px;color:var(--t3);margin-top:36px;padding-
       <div class="form-actions" style="justify-content:center">
         <button class="btn btn-p" onclick="closeModal('modal-rotate-pin')">Selesai</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ POPUP: DETAIL FOLLOW UP (klik pill status di tabel) ══ -->
+<div class="fu-popup-overlay" id="fu-popup-overlay" onclick="closeFuPopup(event)">
+  <div class="fu-popup" onclick="event.stopPropagation()">
+    <div class="fu-popup-title" id="fu-popup-nama">—</div>
+    <div class="fu-popup-sub" id="fu-popup-tgl">—</div>
+    <div class="fu-popup-field">
+      <label>Status Follow Up</label>
+      <div class="fu-val" id="fu-popup-status">—</div>
+    </div>
+    <div class="fu-popup-field">
+      <label>Root Cause (Akar Penyebab)</label>
+      <div id="fu-popup-rc"></div>
+    </div>
+    <div class="fu-popup-field">
+      <label>Corrective Action (Tindakan Perbaikan)</label>
+      <div id="fu-popup-ca"></div>
+    </div>
+    <div class="fu-popup-field">
+      <label>Target Selesai (Deadline)</label>
+      <div class="fu-val" id="fu-popup-dl">—</div>
+    </div>
+    <div class="fu-popup-actions">
+      <button class="btn" onclick="closeFuPopup()">Tutup</button>
+      <button class="btn btn-p" id="fu-popup-edit-btn" style="display:none" onclick="openFuFromPopup()">✏️ Edit Follow Up</button>
     </div>
   </div>
 </div>
@@ -444,7 +554,7 @@ footer{text-align:center;font-size:11px;color:var(--t3);margin-top:36px;padding-
 
 <!-- ══ TREND CHART ══ -->
 <div class="card card-full" id="section-fr-sr-bulanan">
-  <div class="ct">Trend Bulanan FR (Frequency Rate) &amp; SR (Severity Rate) — Jan s/d Jun 2026</div>
+  <div class="ct" id="trend-chart-title">Trend Bulanan FR (Frequency Rate) &amp; SR (Severity Rate)</div>
   <div class="tabs">
     <button class="tab active" onclick="switchTab('fr_lti',this)">FR — LTI Saja<br><span style="font-size:9px;font-weight:400">Lost Time Injury (Hari Kerja Hilang ≥ 0,5)</span></button>
     <button class="tab" onclick="switchTab('fr_total',this)">FR — Total (LTI + Non-LTI)<br><span style="font-size:9px;font-weight:400">Semua kecelakaan Work Related</span></button>
@@ -493,6 +603,8 @@ footer{text-align:center;font-size:11px;color:var(--t3);margin-top:36px;padding-
   </div>
   <div style="margin-top:8px;font-size:10.5px;color:var(--t3);font-style:italic" id="mtbl-footnote"></div>
 </div>
+
+<div class="back-home-wrap"><button class="back-home-btn" onclick="scrollToTop()">⬆ Back to Home</button></div>
 
 <!-- ══ ANALITIK ══ -->
 <div class="sep" id="section-analitik"><span>📊 Analitik Kecelakaan Kerja — Weekly / MTD / YTD</span></div>
@@ -584,6 +696,7 @@ footer{text-align:center;font-size:11px;color:var(--t3);margin-top:36px;padding-
           <th>No</th><th>Tanggal</th><th>Nama</th><th>Departemen</th><th>Sub-Departemen</th>
           <th>Jenis Kejadian</th><th>Kronologi</th><th>Lokasi</th>
           <th>Klasifikasi</th><th style="text-align:center">HKO</th>
+          <th style="text-align:center">Follow Up</th>
           <th class="act-col" id="wh-act-th" style="display:none">Aksi</th>
         </tr>
       </thead>
@@ -619,6 +732,7 @@ footer{text-align:center;font-size:11px;color:var(--t3);margin-top:36px;padding-
           <th style="min-width:120px">Lokasi</th>
           <th style="width:90px;text-align:center">Klasifikasi</th>
           <th style="width:60px;text-align:center">HKO</th>
+          <th style="width:110px;text-align:center">Follow Up</th>
           <th class="act-col" id="log-act-th" style="display:none;width:100px;text-align:center">Aksi</th>
         </tr>
       </thead>
@@ -692,7 +806,9 @@ async function fetchAllData(){
 
   allData = (j.kecelakaan||[]).map(d=>({
     id: d.id, tgl: d.tgl, nama: d.nama, departemen: d.departemen||'', subdep: d.subdep,
-    jenis: d.jenis, kronologi: d.kronologi, lokasi: d.lokasi, hko: parseFloat(d.hko)||0
+    jenis: d.jenis, kronologi: d.kronologi, lokasi: d.lokasi, hko: parseFloat(d.hko)||0,
+    dokumen_paths: d.dokumen_paths || [],
+    follow_up: d.follow_up || {}
   }));
 
   JAM_ROWS = j.jamKerja||[];
@@ -816,13 +932,20 @@ function sigmaKakal(jumlahLTI){
   p=Math.min(Math.max(p,1e-10),1-1e-10); // clamp supaya tidak NaN/Infinity di kasus ekstrem
   return normsinv(p)+1.5;
 }
-function latestWeek(){return Math.max(...allData.map(d=>weekNum(d.tgl)));}
+// latestWeek sekarang selalu berdasarkan HARI INI (real-time),
+// bukan tanggal kasus terbaru di database.
+// Dengan ini, periode dashboard selalu mengikuti minggu kalender berjalan
+// meskipun tidak ada kasus baru yang diinput minggu ini.
+function latestWeek(){ return weekNum(new Date().toISOString().slice(0,10)); }
+const TODAY    = new Date(); // referensi "hari ini" — dipakai di seluruh dashboard
+const nowYear  = TODAY.getFullYear();
 
 // ══ FILTER STATE ══
 let curFilter='ytd';
 function getNowMonth(){
-  const months = Object.keys(JAM_BULAN).map(Number);
-  return months.length ? Math.max(...months) : (new Date()).getMonth()+1;
+  // Selalu pakai bulan kalender hari ini (real-time),
+  // bukan bulan terakhir yang ada data jam kerjanya.
+  return TODAY.getMonth()+1;
 }
 function getFiltered(){
   if(curFilter==='ytd') return allData;
@@ -938,7 +1061,13 @@ function updateAnalytics(){
   const fr=ltiArr.length>0?((ltiArr.length/jam)*1e6).toFixed(2):'0.00';
   const sr=((totalHKO/jam)*1e6).toFixed(2);
 
-  const periodLbl=curFilter==='ytd'?'YTD 2026':curFilter==='mtd'?'MTD Mei 2026':'Minggu W'+String(latestWeek()).padStart(2,'0');
+  const nowMonthName = MONTH_LABELS[TODAY.getMonth()];
+  const nowYear      = TODAY.getFullYear();
+  const periodLbl = curFilter==='ytd'
+    ? 'YTD '+nowYear
+    : curFilter==='mtd'
+      ? 'MTD '+nowMonthName+' '+nowYear
+      : 'Minggu W'+String(latestWeek()).padStart(2,'0');
   document.getElementById('f-info').textContent='→ '+data.length+' kasus ditampilkan';
   document.getElementById('log-period-lbl').textContent=periodLbl;
   document.getElementById('log-lbl2').textContent=periodLbl;
@@ -1167,28 +1296,29 @@ function buildLokasiChart(data){
 
 // ══ WEEK HIGHLIGHT ══
 function buildWeekHighlight(){
-  // Tampilkan kasus dalam rentang 7 hari kalender terakhir (dihitung dari tanggal kasus terbaru)
-  const allDates=allData.map(d=>new Date(d.tgl));
-  const maxDate=new Date(Math.max(...allDates));
-  const minRangeDate=new Date(maxDate); minRangeDate.setDate(maxDate.getDate()-6);
+  // maxDate = HARI INI (real-time dari browser pengguna),
+  // bukan tanggal kasus terbaru di database.
+  // Dengan ini, highlight selalu menampilkan minggu berjalan sekarang,
+  // dan tetap muncul (kosong) meskipun minggu ini tidak ada kasus baru.
+  const maxDate    = new Date();
+  maxDate.setHours(23,59,59,999); // pastikan seluruh hari ini masuk
+  const minRangeDate = new Date(maxDate);
+  minRangeDate.setDate(maxDate.getDate()-6); // 7 hari ke belakang dari hari ini
+  minRangeDate.setHours(0,0,0,0);
 
   const wdata=[...allData].filter(d=>{
     const dt=new Date(d.tgl);
     return dt>=minRangeDate && dt<=maxDate;
   }).sort((a,b)=>new Date(b.tgl)-new Date(a.tgl));
 
-  const lw=weekNum(maxDate.toISOString().slice(0,10));
-  const lw2=weekNum(minRangeDate.toISOString().slice(0,10));
+  const lw  = weekNum(maxDate.toISOString().slice(0,10));
+  const lw2 = weekNum(minRangeDate.toISOString().slice(0,10));
   const fmtOpts={day:'2-digit',month:'short',year:'2-digit'};
-  const dates=wdata.map(d=>new Date(d.tgl)).sort((a,b)=>a-b);
-  const wRangeLabel=dates.length?
-    dates[0].toLocaleDateString('id-ID',fmtOpts)+' – '+dates[dates.length-1].toLocaleDateString('id-ID',fmtOpts)
-    :minRangeDate.toLocaleDateString('id-ID',fmtOpts)+' – '+maxDate.toLocaleDateString('id-ID',fmtOpts);
-  const wkLbl=lw2===lw?String(lw).padStart(2,'0'):String(lw2).padStart(2,'0')+'-'+String(lw).padStart(2,'0');
-  const wLabel='Minggu ke-'+wkLbl+' ('+minRangeDate.toLocaleDateString('id-ID',fmtOpts)+' – '+maxDate.toLocaleDateString('id-ID',fmtOpts)+')';
+  const wkLbl = lw2===lw ? String(lw).padStart(2,'0') : String(lw2).padStart(2,'0')+'-'+String(lw).padStart(2,'0');
+  const wLabel = 'Minggu ke-'+wkLbl+' ('+minRangeDate.toLocaleDateString('id-ID',fmtOpts)+' – '+maxDate.toLocaleDateString('id-ID',fmtOpts)+')';
 
   document.getElementById('wh-title').textContent='🔔 Highlight Kasus — '+wLabel;
-  document.getElementById('wh-sub').textContent='Kasus Work Related yang tercatat pada 7 hari kalender terakhir yang ada datanya (otomatis terdeteksi)';
+  document.getElementById('wh-sub').textContent='Kasus Work Related yang tercatat pada 7 hari kalender terakhir (minggu berjalan — diperbarui otomatis setiap hari)';
   document.getElementById('badge-week').textContent='📅 Update: '+wLabel;
   document.getElementById('wh-badge').textContent=wdata.length+(wdata.length===1?' kasus':' kasus');
 
@@ -1197,7 +1327,9 @@ function buildWeekHighlight(){
 
   const tbody=document.getElementById('wh-tbody');
   if(wdata.length===0){
-    tbody.innerHTML='<tr><td colspan="'+(isAdmin?11:10)+'"><div class="wh-empty">Tidak ada kasus pada minggu ini.</div></td></tr>';
+    tbody.innerHTML='<tr><td colspan="'+(isAdmin?12:11)+'">'
+      +'<div class="wh-empty">✅ Tidak ada kasus kecelakaan kerja pada minggu ini ('+wLabel+').</div>'
+      +'</td></tr>';
     return;
   }
   tbody.innerHTML=wdata.map((d,i)=>{
@@ -1219,6 +1351,7 @@ function buildWeekHighlight(){
       <td style="font-size:11px">${esc(d.lokasi)}</td>
       <td>${pill}</td>
       <td style="text-align:center">${hko>0?'<strong style="color:var(--red)">'+hko+'</strong>':'<span style="color:var(--t3)">0</span>'}</td>
+      <td style="text-align:center">${fuPill(d.id, d.follow_up||{})}</td>
       ${actCell}
     </tr>`;
   }).join('');
@@ -1254,7 +1387,7 @@ function renderCaseTableBody(){
 
   if(sorted.length===0){
     const msg=LOG_SEARCH_QUERY?'Tidak ada kasus yang cocok dengan pencarian "'+esc(LOG_SEARCH_QUERY)+'".':'Tidak ada kasus untuk periode ini.';
-    tbody.innerHTML='<tr><td colspan="'+(isAdmin?12:11)+'"><div class="empty-st">'+msg+'</div></td></tr>';
+    tbody.innerHTML='<tr><td colspan="'+(isAdmin?13:12)+'"><div class="empty-st">'+msg+'</div></td></tr>';
     return;
   }
   tbody.innerHTML=sorted.map((d,i)=>{
@@ -1269,7 +1402,10 @@ function renderCaseTableBody(){
       <td style="color:var(--t3);font-size:10px">${i+1}</td>
       <td style="white-space:nowrap;font-size:11px">${tgl}</td>
       <td style="font-size:11px;color:var(--t2)">${weekLabel(d.tgl)}</td>
-      <td><strong style="font-weight:600">${esc(d.nama)}</strong></td>
+      <td>
+        <strong style="font-weight:600">${esc(d.nama)}</strong>
+        ${d.dokumen_paths&&d.dokumen_paths.length>0?'<span title="'+d.dokumen_paths.length+' dokumen terlampir" style="margin-left:4px;font-size:10px;background:var(--blue-bg);color:var(--blue-t);padding:1px 5px;border-radius:4px">📎 '+d.dokumen_paths.length+'</span>':''}
+      </td>
       <td style="font-size:11px">${esc(d.departemen||'—')}</td>
       <td style="font-size:11px">${esc(d.subdep)}</td>
       <td style="font-size:11px"><span style="background:var(--sf2);padding:1px 6px;border-radius:4px">${esc(d.jenis||'—')}</span></td>
@@ -1277,6 +1413,7 @@ function renderCaseTableBody(){
       <td style="font-size:11px">${esc(d.lokasi)}</td>
       <td style="text-align:center">${pill}</td>
       <td style="text-align:center">${hko>0?'<strong style="color:var(--red)">'+hko+'</strong>':'<span style="color:var(--t3)">0</span>'}</td>
+      <td style="text-align:center">${fuPill(d.id, d.follow_up||{})}</td>
       ${actCell}
     </tr>`;
   }).join('');
@@ -1285,11 +1422,18 @@ function renderCaseTableBody(){
 // ══ EXPORT CSV ══
 function exportCSV(){
   const data=getFiltered();
-  const hdr='No,Tanggal,Minggu,Nama,Sub-Departemen,Jenis Kejadian,Kronologi,Lokasi,Klasifikasi,HKO Hilang';
-  const rows=data.map((d,i)=>[i+1,d.tgl,weekLabel(d.tgl),
-    '"'+d.nama+'"','"'+d.subdep+'"','"'+(d.jenis||'-')+'"',
-    '"'+d.kronologi.replace(/"/g,'""')+'"','"'+(d.lokasi||'-')+'"',
-    isLTI(d)?'LTI':'Non-LTI',d.hko||0].join(','));
+  const hdr='No,Tanggal,Minggu,Nama,Departemen,Sub-Departemen,Jenis Kejadian,Kronologi,Lokasi,Klasifikasi,HKO Hilang,Status Follow Up,Root Cause,Corrective Action,Deadline';
+  const rows=data.map((d,i)=>{
+    const fu=d.follow_up||{};
+    const fuStatus=FU_STATUS_MAP[fu.status||'belum']?.label||'⏳ Belum';
+    return [i+1,d.tgl,weekLabel(d.tgl),
+      '"'+d.nama+'"','"'+(d.departemen||'')+'"','"'+d.subdep+'"','"'+(d.jenis||'-')+'"',
+      '"'+d.kronologi.replace(/"/g,'""')+'"','"'+(d.lokasi||'-')+'"',
+      isLTI(d)?'LTI':'Non-LTI',d.hko||0,
+      '"'+fuStatus+'"','"'+(fu.root_cause||'').replace(/"/g,'""')+'"',
+      '"'+(fu.corrective_action||'').replace(/"/g,'""')+'"',fu.deadline||''
+    ].join(',');
+  });
   const csv=[hdr,...rows].join('\n');
   const a=document.createElement('a');
   a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
@@ -1325,6 +1469,7 @@ function scrollToTop(){
 function openKasusModal(id){
   document.getElementById('kasus-err').textContent='';
   document.getElementById('kasus-id').value='';
+  document.getElementById('dok-progress').textContent='';
   if(id){
     const d=allData.find(x=>String(x.id)===String(id));
     if(!d){ showToast('Data tidak ditemukan',true); return; }
@@ -1338,6 +1483,17 @@ function openKasusModal(id){
     document.getElementById('kasus-jenis').value=d.jenis||'Lain-lain';
     document.getElementById('kasus-lokasi').value=d.lokasi||'';
     document.getElementById('kasus-kronologi').value=d.kronologi||'';
+    // Tampilkan section dokumen dan render daftar dokumen yang sudah ada
+    document.getElementById('dok-section').style.display='block';
+    renderDokumenList(d.id, d.dokumen_paths||[]);
+    // Tampilkan dan isi form follow up
+    document.getElementById('fu-section').style.display='block';
+    document.getElementById('fu-err').textContent='';
+    const fu = d.follow_up || {};
+    document.getElementById('fu-status').value          = fu.status||'belum';
+    document.getElementById('fu-deadline').value        = fu.deadline||'';
+    document.getElementById('fu-root-cause').value      = fu.root_cause||'';
+    document.getElementById('fu-corrective-action').value = fu.corrective_action||'';
   }else{
     document.getElementById('modal-kasus-title').textContent='Tambah Kasus Baru';
     document.getElementById('kasus-tgl').value='';
@@ -1348,6 +1504,9 @@ function openKasusModal(id){
     document.getElementById('kasus-jenis').value='Lain-lain';
     document.getElementById('kasus-lokasi').value='';
     document.getElementById('kasus-kronologi').value='';
+    // Sembunyikan section dokumen dan follow up untuk tambah baru (butuh id dulu)
+    document.getElementById('dok-section').style.display='none';
+    document.getElementById('fu-section').style.display='none';
   }
   document.getElementById('modal-kasus').classList.add('show');
 }
@@ -1403,6 +1562,218 @@ async function deleteKasus(id,nama){
     renderAll();
   }catch(e){
     showToast(e.message,true);
+  }
+}
+
+// ══ MANAJEMEN DOKUMEN ══
+const DOK_API = '/api/dokumen';
+let _currentKasusId = '';
+
+function renderDokumenList(kasusId, paths){
+  _currentKasusId = kasusId;
+  const list = document.getElementById('dok-list');
+  if(!paths || paths.length===0){
+    list.innerHTML='<div class="dok-empty">Belum ada dokumen terlampir.</div>';
+    return;
+  }
+  list.innerHTML = paths.map(p=>{
+    const namaParts = p.split('/');
+    // Format path: {kasusId}/{timestamp}_{namaFile} → tampilkan namaFile saja
+    const rawName = namaParts[namaParts.length-1] || p;
+    const namaFile = rawName.replace(/^\d+_/, ''); // hapus prefix timestamp
+    return `<div class="dok-item">
+      <span class="dok-item-name" title="${esc(rawName)}">📄 ${esc(namaFile)}</span>
+      <button class="btn-mini btn-mini-edit" onclick="downloadDokumen('${esc(p)}')">⬇ Buka</button>
+      <button class="btn-mini btn-mini-del" onclick="hapusDokumen('${esc(p)}','${esc(kasusId)}','${esc(namaFile)}')">Hapus</button>
+    </div>`;
+  }).join('');
+}
+
+async function downloadDokumen(filePath){
+  const progEl = document.getElementById('dok-progress');
+  progEl.textContent = 'Membuat link download...';
+  try{
+    const r = await fetch(DOK_API+'?action=url&path='+encodeURIComponent(filePath), {
+      headers: authHeaders()
+    });
+    const j = await r.json();
+    if(!r.ok) throw new Error(j.error||'Gagal membuat link');
+    window.open(j.url, '_blank');
+    progEl.textContent = '';
+  }catch(e){
+    progEl.textContent = '❌ '+e.message;
+    showToast(e.message, true);
+  }
+}
+
+async function hapusDokumen(filePath, kasusId, namaFile){
+  if(!confirm('Hapus dokumen "'+namaFile+'"? File tidak bisa dikembalikan.')) return;
+  const progEl = document.getElementById('dok-progress');
+  progEl.textContent = 'Menghapus dokumen...';
+  try{
+    const r = await fetch(
+      DOK_API+'?action=hapus&path='+encodeURIComponent(filePath)+'&kasusId='+encodeURIComponent(kasusId),
+      { method:'DELETE', headers: authHeaders() }
+    );
+    const j = await r.json();
+    if(!r.ok) throw new Error(j.error||'Gagal menghapus dokumen');
+    showToast('Dokumen "'+namaFile+'" berhasil dihapus');
+    progEl.textContent = '';
+    // Refresh daftar dokumen dari allData yang sudah di-update server
+    await fetchAllData();
+    const updated = allData.find(d=>String(d.id)===String(kasusId));
+    renderDokumenList(kasusId, updated ? updated.dokumen_paths : []);
+  }catch(e){
+    progEl.textContent = '❌ '+e.message;
+    showToast(e.message, true);
+  }
+}
+
+async function handleDokumenUpload(input){
+  const file = input.files[0];
+  if(!file) return;
+  if(!_currentKasusId){ showToast('Simpan kasus dulu sebelum upload dokumen', true); return; }
+
+  const progEl = document.getElementById('dok-progress');
+  const allowedTypes = ['application/pdf','image/jpeg','image/jpg','image/png','image/webp'];
+  if(!allowedTypes.includes(file.type)){
+    progEl.textContent = '❌ Format file tidak didukung. Gunakan PDF, JPG, PNG, atau WEBP.';
+    input.value='';
+    return;
+  }
+  if(file.size > 10*1024*1024){
+    progEl.textContent = '❌ Ukuran file melebihi batas 10MB.';
+    input.value='';
+    return;
+  }
+
+  progEl.textContent = 'Mengupload "'+file.name+'"... ('+Math.round(file.size/1024)+'KB)';
+
+  // Baca file sebagai base64
+  const base64 = await new Promise((res,rej)=>{
+    const reader = new FileReader();
+    reader.onload  = ()=>res(reader.result.split(',')[1]);
+    reader.onerror = ()=>rej(new Error('Gagal membaca file'));
+    reader.readAsDataURL(file);
+  });
+
+  try{
+    const r = await fetch(
+      DOK_API+'?action=upload&kasusId='+encodeURIComponent(_currentKasusId)+'&namaFile='+encodeURIComponent(file.name),
+      {
+        method:'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ base64, mimeType: file.type })
+      }
+    );
+    const j = await r.json();
+    if(!r.ok) throw new Error(j.error||'Gagal upload');
+    showToast('"'+file.name+'" berhasil diupload');
+    progEl.textContent = '';
+    input.value = '';
+    // Refresh daftar dokumen
+    await fetchAllData();
+    const updated = allData.find(d=>String(d.id)===String(_currentKasusId));
+    renderDokumenList(_currentKasusId, updated ? updated.dokumen_paths : j.paths||[]);
+  }catch(e){
+    progEl.textContent = '❌ '+e.message;
+    showToast(e.message, true);
+  }
+}
+
+// ══ FOLLOW UP ══
+const FU_STATUS_MAP = {
+  'belum'  : { label:'⏳ Belum',                   cls:'fu-belum'   },
+  'proses' : { label:'🔄 Proses',                  cls:'fu-proses'  },
+  'selesai': { label:'✅ Selesai',                  cls:'fu-selesai' },
+  'tidak'  : { label:'❌ Tidak Ditindaklanjuti',    cls:'fu-tidak'   },
+};
+
+function fuPill(kasusId, fu){
+  const s = FU_STATUS_MAP[fu.status||'belum'] || FU_STATUS_MAP['belum'];
+  return `<button class="fu-pill ${s.cls}" onclick="showFuPopup('${kasusId}')" title="Klik untuk detail follow up">${s.label}</button>`;
+}
+
+let _fuPopupKasusId = '';
+function showFuPopup(kasusId){
+  const d = allData.find(x=>String(x.id)===String(kasusId));
+  if(!d) return;
+  _fuPopupKasusId = kasusId;
+  const fu = d.follow_up || {};
+  const s  = FU_STATUS_MAP[fu.status||'belum'] || FU_STATUS_MAP['belum'];
+  const tgl = new Date(d.tgl).toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
+
+  document.getElementById('fu-popup-nama').textContent   = d.nama;
+  document.getElementById('fu-popup-tgl').textContent    = tgl+' · '+esc(d.departemen||d.subdep||'');
+  document.getElementById('fu-popup-status').textContent = s.label;
+
+  const rcEl = document.getElementById('fu-popup-rc');
+  rcEl.innerHTML = fu.root_cause
+    ? '<div class="fu-val">'+esc(fu.root_cause)+'</div>'
+    : '<div class="fu-empty">Belum diisi.</div>';
+
+  const caEl = document.getElementById('fu-popup-ca');
+  caEl.innerHTML = fu.corrective_action
+    ? '<div class="fu-val">'+esc(fu.corrective_action)+'</div>'
+    : '<div class="fu-empty">Belum diisi.</div>';
+
+  const dlEl = document.getElementById('fu-popup-dl');
+  dlEl.textContent = fu.deadline
+    ? new Date(fu.deadline).toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})
+    : '—';
+
+  // Tombol "Edit Follow Up" hanya tampil untuk admin
+  document.getElementById('fu-popup-edit-btn').style.display = AUTH_ROLE==='admin' ? 'inline-block' : 'none';
+
+  document.getElementById('fu-popup-overlay').classList.add('show');
+}
+
+function closeFuPopup(event){
+  if(event && event.target !== document.getElementById('fu-popup-overlay')) return;
+  document.getElementById('fu-popup-overlay').classList.remove('show');
+}
+
+function openFuFromPopup(){
+  document.getElementById('fu-popup-overlay').classList.remove('show');
+  openKasusModal(_fuPopupKasusId);
+  // Scroll ke section follow up di dalam modal
+  setTimeout(()=>{
+    const el = document.getElementById('fu-section');
+    if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+  }, 200);
+}
+
+async function submitFollowUp(){
+  const kasusId = document.getElementById('kasus-id').value;
+  if(!kasusId){ showToast('Simpan kasus dulu sebelum mengisi follow up', true); return; }
+  const errEl = document.getElementById('fu-err');
+  errEl.textContent='';
+
+  const follow_up = {
+    status:            document.getElementById('fu-status').value,
+    root_cause:        document.getElementById('fu-root-cause').value.trim(),
+    corrective_action: document.getElementById('fu-corrective-action').value.trim(),
+    deadline:          document.getElementById('fu-deadline').value,
+  };
+
+  try{
+    const r = await fetch(API_BASE, {
+      method:'PUT', headers:authHeaders(),
+      body: JSON.stringify({ id:kasusId, follow_up, _only_follow_up:true,
+        // Sertakan field wajib agar validasi server tidak error
+        tgl: allData.find(d=>String(d.id)===kasusId)?.tgl||'',
+        nama: allData.find(d=>String(d.id)===kasusId)?.nama||'',
+        hko: allData.find(d=>String(d.id)===kasusId)?.hko||0,
+      })
+    });
+    const j = await r.json();
+    if(!r.ok) throw new Error(j.error||'Gagal menyimpan follow up');
+    showToast('Follow up berhasil disimpan');
+    await fetchAllData();
+    renderAll();
+  }catch(e){
+    errEl.textContent = e.message;
+    showToast(e.message, true);
   }
 }
 
@@ -1548,9 +1919,11 @@ function renderAll(){
   let periodeTxt='—';
   if(bulanList.length){
     const first=MONTH_LABELS[bulanList[0]-1], last=MONTH_LABELS[bulanList[bulanList.length-1]-1];
-    periodeTxt = (first===last?first:first+'–'+last)+' 2026';
+    periodeTxt = (first===last?first:first+'–'+last)+' '+nowYear;
     document.getElementById('kpi-jam-sub').textContent = 'Akumulatif '+periodeTxt;
     document.getElementById('hdr-period').textContent = 'Periode: '+periodeTxt+' · Data kumulatif s/d minggu terakhir';
+    document.getElementById('trend-chart-title').textContent =
+      'Trend Bulanan FR (Frequency Rate) & SR (Severity Rate) — '+periodeTxt;
   }
 
   // KPI Sigma Kakal = NORMSINV((1.000.000 - Jumlah LTI) / 1.000.000) + 1,5
