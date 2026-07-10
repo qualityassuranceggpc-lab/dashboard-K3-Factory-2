@@ -984,20 +984,29 @@ const DEPARTEMEN_LIST=['Cannery','Maintenance CN','Can Making','Concentrate','La
 
 function computeMonthlyStats(){
   months=[]; frLTI=[]; frTotal=[]; srData=[]; ltiMon=[]; nonMon=[]; hkoMon=[];
-  const bulanAda = Object.keys(JAM_BULAN).map(Number).sort((a,b)=>a-b);
-  bulanAda.forEach(b=>{
-    const jam = JAM_BULAN[b]||0;
+
+  // Gabungkan bulan dari JAM_BULAN (jam kerja sudah diisi Admin)
+  // DAN bulan dari allData (ada kasus masuk tapi jam kerja belum diisi)
+  // sehingga bulan berjalan langsung muncul di grafik begitu ada kasus masuk
+  const bulanDariJam  = Object.keys(JAM_BULAN).map(Number);
+  const bulanDariData = [...new Set(allData.map(d=>getMonth(d.tgl)))];
+  const semuaBulan    = [...new Set([...bulanDariJam,...bulanDariData])].sort((a,b)=>a-b);
+
+  semuaBulan.forEach(b=>{
+    const jam = JAM_BULAN[b]||0; // 0 kalau Admin belum isi jam kerja bulan ini
     const row = JAM_ROWS.find(r=>r.bulan===b);
-    const isEstimasi = row ? !!row.is_estimasi : false;
-    const dataBulan = allData.filter(d=>getMonth(d.tgl)===b);
-    const ltiArr = dataBulan.filter(isLTI);
-    const nonArr = dataBulan.filter(d=>!isLTI(d));
-    const hko = dataBulan.reduce((s,d)=>s+(parseFloat(d.hko)||0),0);
+    // Tandai dengan '*' kalau jam kerja estimasi ATAU belum diisi sama sekali
+    const isEstimasi = row ? !!row.is_estimasi : (jam===0 && bulanDariData.includes(b));
+    const dataBulan  = allData.filter(d=>getMonth(d.tgl)===b);
+    const ltiArr     = dataBulan.filter(isLTI);
+    const nonArr     = dataBulan.filter(d=>!isLTI(d));
+    const hko        = dataBulan.reduce((s,d)=>s+(parseFloat(d.hko)||0),0);
 
     months.push(MONTH_LABELS[b-1]+(isEstimasi?'*':''));
     ltiMon.push(ltiArr.length);
     nonMon.push(nonArr.length);
     hkoMon.push(Math.round(hko*10)/10);
+    // FR & SR = 0 kalau jam kerja belum diisi (tidak bisa dibagi 0)
     frLTI.push(jam>0?Math.round((ltiArr.length/jam*1e6)*100)/100:0);
     frTotal.push(jam>0?Math.round(((ltiArr.length+nonArr.length)/jam*1e6)*100)/100:0);
     srData.push(jam>0?Math.round((hko/jam*1e6)*100)/100:0);
@@ -1916,10 +1925,25 @@ function renderAll(){
   // KPI Jam Kerja Nyata (dinamis dari JAM_BULAN)
   document.getElementById('kpi-jam').textContent = (JAM_YTD/1e6).toFixed(2)+'M';
   const bulanList = Object.keys(JAM_BULAN).map(Number).sort((a,b)=>a-b);
+
+  // Bulan akhir periode = mana yang lebih baru:
+  // bulan terakhir dari JAM_BULAN (jam kerja) ATAU bulan dari kasus terbaru di allData
+  // Sehingga kalau Juli ada kasus masuk tapi jam kerja belum diisi,
+  // periode tetap tampil "Jan–Jul 2026"
+  const bulanDariDataAll = allData.length
+    ? Math.max(...allData.map(d=>getMonth(d.tgl)))
+    : 0;
+  const bulanAkhirJam  = bulanList.length ? bulanList[bulanList.length-1] : 0;
+  const bulanAkhir     = Math.max(bulanAkhirJam, bulanDariDataAll);
+  const bulanPertama   = bulanList.length
+    ? Math.min(bulanList[0], allData.length ? Math.min(...allData.map(d=>getMonth(d.tgl))) : 12)
+    : (allData.length ? Math.min(...allData.map(d=>getMonth(d.tgl))) : 1);
+
   let periodeTxt='—';
-  if(bulanList.length){
-    const first=MONTH_LABELS[bulanList[0]-1], last=MONTH_LABELS[bulanList[bulanList.length-1]-1];
-    periodeTxt = (first===last?first:first+'–'+last)+' '+nowYear;
+  if(bulanAkhir>0){
+    const first = MONTH_LABELS[bulanPertama-1];
+    const last  = MONTH_LABELS[bulanAkhir-1];
+    periodeTxt  = (first===last?first:first+'–'+last)+' '+nowYear;
     document.getElementById('kpi-jam-sub').textContent = 'Akumulatif '+periodeTxt;
     document.getElementById('hdr-period').textContent = 'Periode: '+periodeTxt+' · Data kumulatif s/d minggu terakhir';
     document.getElementById('trend-chart-title').textContent =
